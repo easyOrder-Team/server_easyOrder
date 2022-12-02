@@ -1,3 +1,12 @@
-/**Toda la conexion a la base de datos debera ir en este archivo
- * no importa el freamwork, orm o aplicación que utilicemos
- */
+require("dotenv").config({ path: "../.env" });
+const { Pool } = require("pg");
+const { DB_USER, DB_PASSWORD, DB_HOST, DB_NAME } = process.env;
+
+const pool = new Pool({
+  user: DB_USER,
+  host: DB_HOST,
+  password: DB_PASSWORD,
+  database: DB_NAME,
+});
+
+module.exports = pool
