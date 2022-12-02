@@ -5,21 +5,25 @@ const fs = require('fs')
 const pathRouter = `${__dirname}`
 
 const removeExtension = (fileName) => {
-    return fileName.split('.').shift()
-}
+  return fileName.split(".").shift();
+};
 
 fs.readdirSync(pathRouter).filter((file) => {
-    const withOutExt = removeExtension(file)
-    const skipe = ['index'].includes(withOutExt)
-    if (!skipe) {
-        router.use(`/${withOutExt}`, require(`${withOutExt}`))
-        console.log('---->',withOutExt )
+  const withOutExt = removeExtension(file);
+  const skipe = ["index"].includes(withOutExt);
+  if (!skipe) {
+    router.use(`/${withOutExt}`, require(`${withOutExt}`));
+    console.log("---->", withOutExt);
+  }
+});
 
-    }
-})
+router.post('/product', createProduct)
+
+
+router.get("*", (req, res) => {
+  res.status(404).send({ Error: "Not Found" });
+});
 
 router.get("*", (req, res)=>{
     res.status(404).send({Error:'Not Found'})
 })
-
-module.exports = router
