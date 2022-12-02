@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const fs = require('fs')
+const fs = require('fs');
 
 const pathRouter = `${__dirname}`
 
@@ -17,7 +17,9 @@ fs.readdirSync(pathRouter).filter((file) => {
   }
 });
 
-router.post('/product', createProduct)
+router.post("/product", createProduct);
+router.get("/products", getProducts);
+router.delete("/product/:id", deleteProduct);
 
 
 router.get("*", (req, res) => {
@@ -27,3 +29,5 @@ router.get("*", (req, res) => {
 router.get("*", (req, res)=>{
     res.status(404).send({Error:'Not Found'})
 })
+
+module.exports = router;
