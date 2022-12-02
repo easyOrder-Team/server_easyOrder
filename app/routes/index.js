@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const fs = require('fs')
-
+const {createProduct} = require('../controllers/index')
 const pathRouter = `${__dirname}`
 
 const removeExtension = (fileName) => {
@@ -17,6 +17,10 @@ fs.readdirSync(pathRouter).filter((file) => {
 
     }
 })
+
+router.post('/products', createProduct)
+router.get('/product/:id')
+router.put('product/:id')
 
 router.get("*", (req, res)=>{
     res.status(404).send({Error:'Not Found'})
