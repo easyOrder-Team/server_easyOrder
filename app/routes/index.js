@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const fs = require('fs');
-
+const {createProduct, getProducts, deleteProduct, getProductById ,getCategories} = require('../controllers')
 const pathRouter = `${__dirname}`
 
 const removeExtension = (fileName) => {
