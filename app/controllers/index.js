@@ -60,11 +60,14 @@ const createProduct = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await pool.query(
-      `SELECT * FROM products WHERE Id_products = '${id}'`
+    let product = await pool.query(
+      `select * from products
+      inner join products_category on products_category.id_product = products.id_products
+      inner join category on category.id_category = products_category.id_categorie where products.id_products = ${id}`
     );
     if (product.rowCount === 0) throw new Error("Not found");
-    res.json(product.rows);
+    product = orderProduct(product)
+    res.json(product);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -81,62 +84,50 @@ const getProducts = async (req, res) => {
        inner join products_category ON products_category.id_product = products.id_products
        inner join category on category.id_category = products_category.id_categorie where products."name" = '${name}'`
       );
-      allData = dbData.rows.map((d) => {
-        return {
-          id: d.id_products,
-          name: d.name,
-          description: d.description,
-          price: d.price,
-          stock: d.stock,
-          prep_time: d.prep_time,
-          category: [{ id: d.id_category, name: d.name_c }],
-        };
-      });
-      let notRepeat = [];
-
-      for (let i = 0; i < allData.length; i++) {
-        if (notRepeat.findIndex((p) => p.id === allData[i].id) === -1)
-          notRepeat.push(allData[i]);
-        else {
-          let index = notRepeat.findIndex((p) => p.id === allData[i].id);
-          notRepeat[index].category = [
-            ...notRepeat[index].category,
-            ...allData[i].category,
-          ];
-        }
-      }
-      return res.json(notRepeat);
+      allData = orderProduct(dbData);
+      return res.json(allData);
     } else {
       const dbData = await pool.query(
         `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
         inner join products_category ON products_category.id_product = products.id_products
         inner join category on category.id_category = products_category.id_categorie`
-      ); //esto debemos ver como aplicarlo, porque nos repite el plato dependiendo de las relaciones, pero se diferencian que tran relaciones diferentes
-      return res.json(dbData.rows);
+      );
+      allData = orderProduct(dbData);
+      return res.json(allData);
     }
   } catch (error) {
-    res.json(error);
+    res.json(error.message);
   }
 };
 
 const getCategories = async (req, res) => {
   try {
-    const categories = await pool.query("select name from category;");
+    const categories = await pool.query("select name_c from category;");
     res.send(categories.rows);
   } catch (error) {
-    res.send({ error: error.message });
+    res.json(error.message);
   }
 };
+
+const createCategory = (req, res) => {
+  let {name} = req.body
+  try {
+    pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`)
+    res.sendStatus(201)
+  } catch (error) {
+    res.json(error.message);
+  }
+}
 
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
     const deleteFromMidleTable = await pool.query(
-      `DELETE FROM products_category WHERE id_product = ${id} `
+      `DELETE FROM products_category WHERE id_product = ${id}`
     );
     const deletedProduct = await pool.query(
-      `DELETE FROM products WHERE Id_products = '${id}' `
+      `DELETE FROM products WHERE id_products = ${id}`
     );
     if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
       throw new Error("Product not found");
@@ -152,4 +143,5 @@ module.exports = {
   deleteProduct,
   getProductById,
   getCategories,
+  createCategory
 };
