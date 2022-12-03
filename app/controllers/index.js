@@ -26,9 +26,8 @@ const orderProduct = (dbData) => {
       ];
     }
   }
-  return notRepeat
-}
-
+  return notRepeat;
+};
 
 const createProduct = async (req, res) => {
   try {
@@ -62,11 +61,14 @@ const createProduct = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await pool.query(
-      `SELECT * FROM products WHERE Id_products = '${id}'`
+    let product = await pool.query(
+      `select * from products
+      inner join products_category on products_category.id_product = products.id_products
+      inner join category on category.id_category = products_category.id_categorie where products.id_products = ${id}`
     );
     if (product.rowCount === 0) throw new Error("Not found");
-    res.json(product.rows);
+    product = orderProduct(product)
+    res.json(product);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -82,7 +84,7 @@ const getProducts = async (req, res) => {
        inner join products_category ON products_category.id_product = products.id_products
        inner join category on category.id_category = products_category.id_categorie where products."name" = '${name}'`
       );
-      allData = orderProduct(dbData)
+      allData = orderProduct(dbData);
       return res.json(allData);
     } else {
       const dbData = await pool.query(
@@ -90,30 +92,45 @@ const getProducts = async (req, res) => {
         inner join products_category ON products_category.id_product = products.id_products
         inner join category on category.id_category = products_category.id_categorie`
       );
-      allData = orderProduct(dbData)
+      allData = orderProduct(dbData);
       return res.json(allData);
     }
   } catch (error) {
-    res.json(error);
+    res.json(error.message);
   }
 };
 
 const getCategories = async (req, res) => {
   try {
-    const categories = await pool.query("select name from category;");
+    const categories = await pool.query("select name_c from category;");
     res.send(categories.rows);
   } catch (error) {
-    res.send({ error: error.message });
+    res.json(error.message);
   }
 };
+
+const createCategory = (req, res) => {
+  let {name} = req.body
+  try {
+    pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`)
+    res.sendStatus(201)
+  } catch (error) {
+    res.json(error.message);
+  }
+}
 
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedProduct = await pool.query(
-      `DELETE FROM products WHERE Id_products = '${id}' `
+
+    const deleteFromMidleTable = await pool.query(
+      `DELETE FROM products_category WHERE id_product = ${id}`
     );
-    if (deletedProduct.rowCount === 0) throw new Error("Product not found");
+    const deletedProduct = await pool.query(
+      `DELETE FROM products WHERE id_products = ${id}`
+    );
+    if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
+      throw new Error("Product not found");
     return res.json("the product has been deleted");
   } catch (error) {
     res.json(error);
@@ -126,4 +143,5 @@ module.exports = {
   deleteProduct,
   getProductById,
   getCategories,
+  createCategory
 };
