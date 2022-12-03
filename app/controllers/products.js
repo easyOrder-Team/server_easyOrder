@@ -1,24 +1,31 @@
 const pool = require("../../config/bd");
+
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
       req.body;
-    let allCategories = await pool.query("select * from category;");
+    let allCategories = await pool.query("select * from category;");    
     allCategories = allCategories.rows;
+    console.log(allCategories)
     await pool.query(
       `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
     );
     let newProduct = await pool.query(
       "Select * from products where id = (select max(id) from products);"
     );
-    newProduct = newProduct.rows[0].id;
-    for (let i = 0; i < categories.length; i++) {
-      if (allCategories[i].name.toLowerCase().includes(categories)) {
-        await pool.query(
-          `insert into products_category (id_product,id_category) values('${newProduct}','${allCategories[i].id}' )`
-        );
-      }
-    }
+    newProduct=newProduct.rows[0]
+    
+    
+    categories.map(async (category) => {
+      allCategories.map(async (categoryDb) =>{
+        if (category.includes(categoryDb.name)) {
+          await pool.query(
+            `insert into products_category (id_product,id_category) values('${newProduct.id}','${categoryDb.id}' )`
+          );
+        }
+      })
+      
+    });
     res.sendStatus(201);
   } catch (error) {
     res.status(404).json({ error: error.message });
