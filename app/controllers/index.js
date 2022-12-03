@@ -45,7 +45,7 @@ const getProductById = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const { name } = req.query;
-    let allData = []
+    let allData = [];
     if (name) {
       const dbData = await pool.query(
         `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
@@ -59,6 +59,7 @@ const getProducts = async (req, res) => {
           description: d.description,
           price: d.price,
           stock: d.stock,
+          image: d.image,
           prep_time: d.prep_time,
           category: [{ id: d.id_category, name: d.name_c }],
         };
@@ -90,6 +91,7 @@ const getProducts = async (req, res) => {
           description: d.description,
           price: d.price,
           stock: d.stock,
+          image: d.image,
           prep_time: d.prep_time,
           category: [{ id: d.id_category, name: d.name_c }],
         };
@@ -126,10 +128,15 @@ const getCategories = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedProduct = await pool.query(
-      `DELETE FROM products WHERE Id_products = '${id}' `
+    
+    const deleteFromMidleTable = await pool.query(
+      `DELETE FROM products_category WHERE id_product = ${id} `
     );
-    if (deletedProduct.rowCount === 0) throw new Error("Product not found");
+    const deletedProduct = await pool.query(
+      `DELETE FROM products WHERE id_products = '${id}' `
+    );
+    if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
+      throw new Error("Product not found");
     return res.json("the product has been deleted");
   } catch (error) {
     res.json(error);
