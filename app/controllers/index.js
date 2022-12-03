@@ -14,16 +14,17 @@ const createProduct = async (req, res) => {
       "Select * from products where Id_products = (select max(Id_products) from products);"
     );
     newProduct = newProduct.rows[0].id_products;
-    
+
     for (let i = 0; i < allCategories.length; i++) {
       for (let j = 0; j < categories.length; j++) {
-        if(allCategories[i].name_c === categories[j]){
-          await pool.query(`insert into products_category (id_product,Id_Categorie) values('${newProduct}','${allCategories[i].id_category}' )`)
+        if (allCategories[i].name_c === categories[j]) {
+          await pool.query(
+            `insert into products_category (id_product,Id_Categorie) values('${newProduct}','${allCategories[i].id_category}' )`
+          );
         }
       }
     }
-    res.sendStatus(201)
-    
+    res.sendStatus(201);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -32,10 +33,10 @@ const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await pool.query(
-      `SELECT * FROM products WHERE id = '${id}'`
+      `SELECT * FROM products WHERE Id_products = '${id}'`
     );
     if (product.rowCount === 0) throw new Error("Not found");
-    res.json(product);
+    res.json(product.rows);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -44,20 +45,69 @@ const getProductById = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const { name } = req.query;
+    let allData = []
     if (name) {
       const dbData = await pool.query(
-       `select products.id, products."name",products.description, products.image, products.price, products.stock, products.prep_time, category.id, category."name" from products
-       inner join products_category on products_category.id_product = products.id
-       inner join category ON category.id = products_category.id_category where products.name = '${name}'`
+        `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
+       inner join products_category ON products_category.id_product = products.id_products
+       inner join category on category.id_category = products_category.id_categorie where products."name" = '${name}'`
       );
+      allData = dbData.rows.map((d) => {
+        return {
+          id: d.id_products,
+          name: d.name,
+          description: d.description,
+          price: d.price,
+          stock: d.stock,
+          prep_time: d.prep_time,
+          category: [{ id: d.id_category, name: d.name_c }],
+        };
+      });
+      let notRepeat = [];
 
-      return res.json(dbData.rows);
+      for (let i = 0; i < allData.length; i++) {
+        if (notRepeat.findIndex((p) => p.id === allData[i].id) === -1)
+          notRepeat.push(allData[i]);
+        else {
+          let index = notRepeat.findIndex((p) => p.id === allData[i].id);
+          notRepeat[index].category = [
+            ...notRepeat[index].category,
+            ...allData[i].category,
+          ];
+        }
+      }
+      return res.json(notRepeat);
     } else {
       const dbData = await pool.query(
         `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
         inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie`); //esto debemos ver como aplicarlo, porque nos repite el plato dependiendo de las relaciones, pero se diferencian que tran relaciones diferentes
-      return res.json(dbData.rows);
+        inner join category on category.id_category = products_category.id_categorie`
+      );
+      allData = dbData.rows.map((d) => {
+        return {
+          id: d.id_products,
+          name: d.name,
+          description: d.description,
+          price: d.price,
+          stock: d.stock,
+          prep_time: d.prep_time,
+          category: [{ id: d.id_category, name: d.name_c }],
+        };
+      });
+      let notRepeat = [];
+
+      for (let i = 0; i < allData.length; i++) {
+        if (notRepeat.findIndex((p) => p.id === allData[i].id) === -1)
+          notRepeat.push(allData[i]);
+        else {
+          let index = notRepeat.findIndex((p) => p.id === allData[i].id);
+          notRepeat[index].category = [
+            ...notRepeat[index].category,
+            ...allData[i].category,
+          ];
+        }
+      }
+      return res.json(notRepeat);
     }
   } catch (error) {
     res.json(error);
@@ -77,7 +127,7 @@ const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedProduct = await pool.query(
-      `DELETE FROM products WHERE id = '${id}' `
+      `DELETE FROM products WHERE Id_products = '${id}' `
     );
     if (deletedProduct.rowCount === 0) throw new Error("Product not found");
     return res.json("the product has been deleted");
