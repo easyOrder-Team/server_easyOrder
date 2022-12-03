@@ -6,23 +6,24 @@ const createProduct = async (req, res) => {
       req.body;
     let allCategories = await pool.query("select * from category;");
     allCategories = allCategories.rows;
+    // res.json(allCategories);
     await pool.query(
       `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
     );
     let newProduct = await pool.query(
-      "Select * from products where id = (select max(id) from products);"
+      "Select * from products where Id_products = (select max(Id_products) from products);"
     );
-    newProduct = newProduct.rows[0].id;
-
+    newProduct = newProduct.rows[0].id_products;
+    
     for (let i = 0; i < allCategories.length; i++) {
       for (let j = 0; j < categories.length; j++) {
-        if(allCategories[i].name === categories[j]){
-          await pool.query(`insert into products_category (id_product,id_category) values('${newProduct}','${allCategories[i].id}' )`)
+        if(allCategories[i].name_c === categories[j]){
+          await pool.query(`insert into products_category (id_product,Id_Categorie) values('${newProduct}','${allCategories[i].id_category}' )`)
         }
       }
     }
-
-    res.sendStatus(201);
+    res.sendStatus(201)
+    
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -45,15 +46,17 @@ const getProducts = async (req, res) => {
     const { name } = req.query;
     if (name) {
       const dbData = await pool.query(
-        `select * from products 
-        inner join products_category on products_category.id_product = products.id where name = '${name}'`
+       `select products.id, products."name",products.description, products.image, products.price, products.stock, products.prep_time, category.id, category."name" from products
+       inner join products_category on products_category.id_product = products.id
+       inner join category ON category.id = products_category.id_category where products.name = '${name}'`
       );
 
       return res.json(dbData.rows);
     } else {
       const dbData = await pool.query(
-        `SELECT * FROM products 
-      inner join products_category on products_category.id_product = products.id`); //esto debemos ver como aplicarlo, porque nos repite el plato dependiendo de las relaciones, pero se diferencian que tran relaciones diferentes
+        `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
+        inner join products_category ON products_category.id_product = products.id_products
+        inner join category on category.id_category = products_category.id_categorie`); //esto debemos ver como aplicarlo, porque nos repite el plato dependiendo de las relaciones, pero se diferencian que tran relaciones diferentes
       return res.json(dbData.rows);
     }
   } catch (error) {
