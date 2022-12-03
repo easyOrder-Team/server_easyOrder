@@ -1,5 +1,35 @@
 const pool = require("../../config/bd");
 
+const orderProduct = (dbData) => {
+  allData = dbData.rows.map((d) => {
+    return {
+      id: d.id_products,
+      name: d.name,
+      description: d.description,
+      price: d.price,
+      image: d.image,
+      stock: d.stock,
+      prep_time: d.prep_time,
+      category: [{ id: d.id_category, name: d.name_c }],
+    };
+  });
+  let notRepeat = [];
+
+  for (let i = 0; i < allData.length; i++) {
+    if (notRepeat.findIndex((p) => p.id === allData[i].id) === -1)
+      notRepeat.push(allData[i]);
+    else {
+      let index = notRepeat.findIndex((p) => p.id === allData[i].id);
+      notRepeat[index].category = [
+        ...notRepeat[index].category,
+        ...allData[i].category,
+      ];
+    }
+  }
+  return notRepeat
+}
+
+
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
@@ -45,69 +75,23 @@ const getProductById = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const { name } = req.query;
-    let allData = []
+    let allData;
     if (name) {
       const dbData = await pool.query(
         `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
        inner join products_category ON products_category.id_product = products.id_products
        inner join category on category.id_category = products_category.id_categorie where products."name" = '${name}'`
       );
-      allData = dbData.rows.map((d) => {
-        return {
-          id: d.id_products,
-          name: d.name,
-          description: d.description,
-          price: d.price,
-          stock: d.stock,
-          prep_time: d.prep_time,
-          category: [{ id: d.id_category, name: d.name_c }],
-        };
-      });
-      let notRepeat = [];
-
-      for (let i = 0; i < allData.length; i++) {
-        if (notRepeat.findIndex((p) => p.id === allData[i].id) === -1)
-          notRepeat.push(allData[i]);
-        else {
-          let index = notRepeat.findIndex((p) => p.id === allData[i].id);
-          notRepeat[index].category = [
-            ...notRepeat[index].category,
-            ...allData[i].category,
-          ];
-        }
-      }
-      return res.json(notRepeat);
+      allData = orderProduct(dbData)
+      return res.json(allData);
     } else {
       const dbData = await pool.query(
         `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
         inner join products_category ON products_category.id_product = products.id_products
         inner join category on category.id_category = products_category.id_categorie`
       );
-      allData = dbData.rows.map((d) => {
-        return {
-          id: d.id_products,
-          name: d.name,
-          description: d.description,
-          price: d.price,
-          stock: d.stock,
-          prep_time: d.prep_time,
-          category: [{ id: d.id_category, name: d.name_c }],
-        };
-      });
-      let notRepeat = [];
-
-      for (let i = 0; i < allData.length; i++) {
-        if (notRepeat.findIndex((p) => p.id === allData[i].id) === -1)
-          notRepeat.push(allData[i]);
-        else {
-          let index = notRepeat.findIndex((p) => p.id === allData[i].id);
-          notRepeat[index].category = [
-            ...notRepeat[index].category,
-            ...allData[i].category,
-          ];
-        }
-      }
-      return res.json(notRepeat);
+      allData = orderProduct(dbData)
+      return res.json(allData);
     }
   } catch (error) {
     res.json(error);
