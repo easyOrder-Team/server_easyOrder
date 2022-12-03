@@ -1,4 +1,5 @@
 const pool = require("../../config/bd");
+
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
@@ -12,13 +13,15 @@ const createProduct = async (req, res) => {
       "Select * from products where id = (select max(id) from products);"
     );
     newProduct = newProduct.rows[0].id;
-    for (let i = 0; i < categories.length; i++) {
-      if (allCategories[i].name.toLowerCase().includes(categories)) {
-        await pool.query(
-          `insert into products_category (id_product,id_category) values('${newProduct}','${allCategories[i].id}' )`
-        );
+
+    for (let i = 0; i < allCategories.length; i++) {
+      for (let j = 0; j < categories.length; j++) {
+        if(allCategories[i].name === categories[j]){
+          await pool.query(`insert into products_category (id_product,id_category) values('${newProduct}','${allCategories[i].id}' )`)
+        }
       }
     }
+
     res.sendStatus(201);
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -42,11 +45,15 @@ const getProducts = async (req, res) => {
     const { name } = req.query;
     if (name) {
       const dbData = await pool.query(
-        `SELECT * FROM products WHERE name = '${name}'`
+        `select * from products 
+        inner join products_category on products_category.id_product = products.id where name = '${name}'`
       );
+
       return res.json(dbData.rows);
     } else {
-      const dbData = await pool.query("SELECT * FROM products");
+      const dbData = await pool.query(
+        `SELECT * FROM products 
+      inner join products_category on products_category.id_product = products.id`); //esto debemos ver como aplicarlo, porque nos repite el plato dependiendo de las relaciones, pero se diferencian que tran relaciones diferentes
       return res.json(dbData.rows);
     }
   } catch (error) {

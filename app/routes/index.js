@@ -21,6 +21,7 @@ router.post("/product", createProduct);
 router.get("/products", getProducts);
 router.delete("/product/:id", deleteProduct);
 router.get("/product/:id", getProductById)
+router.get("/products/categories", getCategories)
 
 
 router.get("*", (req, res) => {
