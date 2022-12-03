@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const fs = require('fs');
-const {createProduct, getProducts, deleteProduct, getProductById ,getCategories} = require('../controllers')
+const {createProduct, getProducts, deleteProduct, getProductById ,getCategories, createCategory} = require('../controllers')
 const pathRouter = `${__dirname}`
 
 const removeExtension = (fileName) => {
@@ -22,6 +22,7 @@ router.get("/products", getProducts);
 router.delete("/product/:id", deleteProduct);
 router.get("/product/:id", getProductById)
 router.get("/products/categories", getCategories)
+router.post("/products/categorie",createCategory)
 
 
 router.get("*", (req, res) => {
