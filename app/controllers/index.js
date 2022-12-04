@@ -33,21 +33,21 @@ const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
       req.body;
-    let allCategories = await pool.query("select * from category;");
+    let allCategories = await pool.query("SELECT * FROM category;");
     allCategories = allCategories.rows;
     await pool.query(
       `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
     );
     let newProduct = await pool.query(
-      "Select * from products where Id_products = (select max(Id_products) from products);"
+      "SELECT * FROM products WHERE id_products = (SELECT MAX(id_products) FROM products);"
     );
     newProduct = newProduct.rows[0].id_products;
 
     for (let i = 0; i < allCategories.length; i++) {
       for (let j = 0; j < categories.length; j++) {
-        if (allCategories[i].name_c === categories[j]) {
+        if (allCategories[i].name_c === categories[j].toLowerCase()) {
           await pool.query(
-            `insert into products_category (id_product,Id_Categorie) values('${newProduct}','${allCategories[i].id_category}' )`
+            `INSERT INTO products_category (id_product,Id_Categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
           );
         }
       }
@@ -61,12 +61,12 @@ const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
     let product = await pool.query(
-      `select * from products
-      inner join products_category on products_category.id_product = products.id_products
-      inner join category on category.id_category = products_category.id_categorie where products.id_products = ${id}`
+      `SELECT * FROM products
+      INNER JOIN products_category ON products_category.id_product = products.id_products
+      INNER JOIN category ON category.id_category = products_category.id_categorie WHERE products.id_products = ${id}`
     );
     if (product.rowCount === 0) throw new Error("Not found");
-    product = orderProduct(product)
+    product = orderProduct(product);
     res.json(product);
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -75,14 +75,13 @@ const getProductById = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
-    let { name } = req.query;
-    name = name.toLowerCase();
+    const { name } = req.query;
     let allData = [];
     if (name) {
       const dbData = await pool.query(
-        `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-       inner join products_category ON products_category.id_product = products.id_products
-       inner join category on category.id_category = products_category.id_categorie where products."name" = '${name}'`
+        `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
+       INNER JOIN products_category ON products_category.id_product = products.id_products
+       INNER JOIN category ON category.id_category = products_category.id_categorie WHERE LOWER(products.name) ~ LOWER('${name}')`
       );
       allData = orderProduct(dbData);
       return res.json(allData);
@@ -102,7 +101,7 @@ const getProducts = async (req, res) => {
 
 const getCategories = async (req, res) => {
   try {
-    const categories = await pool.query("select name_c from category;");
+    const categories = await pool.query("SELECT name_c FROM category;");
     res.send(categories.rows);
   } catch (error) {
     res.json(error.message);
@@ -110,14 +109,15 @@ const getCategories = async (req, res) => {
 };
 
 const createCategory = (req, res) => {
-  let {name} = req.body
+  let { name } = req.body;
   try {
-    pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`)
-    res.sendStatus(201)
+    name = name.toLowerCase();
+    pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
+    res.sendStatus(201);
   } catch (error) {
     res.json(error.message);
   }
-}
+};
 
 const deleteProduct = async (req, res) => {
   try {
@@ -136,6 +136,20 @@ const deleteProduct = async (req, res) => {
     res.json(error);
   }
 };
+const filterByCategory = async (req, res) => {
+  let { category } = req.query;
+  try {
+    category = category.toLowerCase();
+    let products = await pool.query(`SELECT * FROM products
+    INNER JOIN products_category ON products_category.id_product = products.id_products
+    INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}'`);
+
+    products = orderProduct(products);
+    res.json(products);
+  } catch (error) {
+    res.json(error.message);
+  }
+};
 
 module.exports = {
   createProduct,
@@ -143,5 +157,6 @@ module.exports = {
   deleteProduct,
   getProductById,
   getCategories,
-  createCategory
+  createCategory,
+  filterByCategory,
 };
