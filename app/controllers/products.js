@@ -1,30 +1,29 @@
+const { response } = require("express");
 const pool = require("../../config/bd");
 
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
       req.body;
-    let allCategories = await pool.query("select * from category;");    
+    let allCategories = await pool.query("select * from category;");
     allCategories = allCategories.rows;
-    console.log(allCategories)
+    console.log(allCategories);
     await pool.query(
       `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
     );
     let newProduct = await pool.query(
       "Select * from products where id = (select max(id) from products);"
     );
-    newProduct=newProduct.rows[0]
-    
-    
+    newProduct = newProduct.rows[0];
+
     categories.map(async (category) => {
-      allCategories.map(async (categoryDb) =>{
+      allCategories.map(async (categoryDb) => {
         if (category.includes(categoryDb.name)) {
           await pool.query(
             `insert into products_category (id_product,id_category) values('${newProduct.id}','${categoryDb.id}' )`
           );
         }
-      })
-      
+      });
     });
     res.sendStatus(201);
   } catch (error) {
@@ -83,10 +82,44 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const getProductByCategory = async (req, res) => {
+  try {
+    const allCategories = await pool.query("select * from category");
+
+    let allProductsByCategory = allCategories.rows.map(async (category) => {
+      let data;
+      let idProductsByCategory = await pool.query(
+        `select id_product from products_category where id_category=${category.id}`
+      );
+      idProductsByCategory = idProductsByCategory.rows;
+
+      let namesProducts = idProductsByCategory.map(async (idProduct) => {
+        let name = await pool.query(
+          `select name from products where id = ${idProduct.id_product}`
+        );
+        name = name.rows[0].name;
+        return name;
+      });
+
+      Promise.all(namesProducts).then((values) => {
+        data = {
+          category: `${category.name}`,
+          products: `${namesProducts}`,
+        };
+      });
+
+      
+    });
+  } catch (error) {
+    res.send(error);
+  }
+};
+
 module.exports = {
   createProduct,
   getProducts,
   deleteProduct,
   getProductById,
   getCategories,
+  getProductByCategory,
 };
