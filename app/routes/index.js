@@ -9,6 +9,7 @@ const {
   getCategories,
   createCategory,
   filterByCategory,
+  updateProduct,
 } = require("../controllers");
 const pathRouter = `${__dirname}`;
 
@@ -31,7 +32,8 @@ router.delete("/product/:id", deleteProduct);
 router.get("/product/:id", getProductById);
 router.get("/products/categories", getCategories);
 router.post("/products/category", createCategory);
-router.get("/products/filterByCategory", filterByCategory)
+router.get("/products/filterByCategory", filterByCategory);
+router.put("/product/update/:id", updateProduct);
 
 router.get("*", (req, res) => {
   res.status(404).send({ Error: "Not Found" });
