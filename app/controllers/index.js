@@ -47,7 +47,7 @@ const createProduct = async (req, res) => {
       for (let j = 0; j < categories.length; j++) {
         if (allCategories[i].name_c === categories[j].toLowerCase()) {
           await pool.query(
-            `INSERT INTO products_category (id_product,Id_Categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
+            `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
           );
         }
       }
@@ -57,6 +57,7 @@ const createProduct = async (req, res) => {
     res.status(404).json({ error: error.message });
   }
 };
+
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -136,6 +137,40 @@ const deleteProduct = async (req, res) => {
     res.json(error);
   }
 };
+
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const keys = Object.keys(req.body);
+    const values = Object.values(req.body);
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      let value = values[i];
+      const data = await pool.query(
+        `UPDATE products SET ${key} = '${value}' WHERE id_products = ${id}`
+      );
+    }
+    return res.json("the product has been updated");
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+// const updateProduct = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { name, description, price, image, stock, prep_time, categories } =
+//       req.body;
+//       console.log()
+//     const data = await pool.query(
+//       `UPDATE products SET name = '${name}', description = '${description}', price = ${price}, image = '${image}', stock = ${stock}, prep_time = ${prep_time}, categories = '${categories}' WHERE id_products = ${id}`
+//     );
+//     if (data.rows.length === 0) throw new Error("Product not found");
+//     return res.json("the product has been updated");
+//   } catch (error) {
+//     res.json(error.message);
+//   }
+// };
+
 const filterByCategory = async (req, res) => {
   let { category } = req.query;
   try {
@@ -159,4 +194,5 @@ module.exports = {
   getCategories,
   createCategory,
   filterByCategory,
+  updateProduct,
 };
