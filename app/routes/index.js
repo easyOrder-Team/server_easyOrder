@@ -21,12 +21,4 @@ router.get("*", (req, res) => {
   res.status(404).send({ Error: "Not Found" });
 });
 
-router.get("*", (req, res) => {
-  res.status(404).send({ Error: "Not Found" });
-});
-
-router.get("*", (req, res)=>{
-    res.status(404).send({Error:'Not Found'})
-})
-
 module.exports = router;
