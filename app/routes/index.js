@@ -1,8 +1,8 @@
-const express = require('express')
-const router = express.Router()
-const fs = require('fs');
+const express = require("express");
+const router = express.Router();
+const fs = require("fs");
 
-const pathRouter = `${__dirname}`
+const pathRouter = `${__dirname}`;
 
 const removeExtension = (fileName) => {
   return fileName.split(".").shift();
@@ -18,10 +18,16 @@ fs.readdirSync(pathRouter).filter((file) => {
 });
 
 
+router.get("*", (req, res) => {
+  res.status(404).send({ Error: "Not Found" });
+});
 
 router.get("*", (req, res) => {
   res.status(404).send({ Error: "Not Found" });
 });
 
+router.get("*", (req, res)=>{
+    res.status(404).send({Error:'Not Found'})
+})
 
 module.exports = router;
