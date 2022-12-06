@@ -1,3 +1,4 @@
+const { response } = require("express");
 const pool = require("../../config/bd");
 
 const orderProduct = (dbData) => {
@@ -35,6 +36,7 @@ const createProduct = async (req, res) => {
       req.body;
     let allCategories = await pool.query("SELECT * FROM category;");
     allCategories = allCategories.rows;
+    console.log(allCategories);
     await pool.query(
       `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
     );
