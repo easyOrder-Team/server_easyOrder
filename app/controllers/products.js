@@ -127,11 +127,9 @@ const deleteProduct = async (req, res) => {
     const { id } = req.params;
 
     const deleteFromMidleTable = await pool.query(
-      // `DELETE FROM products_category WHERE id_product = ${id}` 
       `UPDATE products_category SET active = False WHERE id_product = ${id}`
     );
     const deletedProduct = await pool.query(
-      // `DELETE FROM products WHERE id_products = ${id}`
       `UPDATE products SET stock = False WHERE id_products = ${id}`
     );
     if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
