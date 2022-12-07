@@ -1,5 +1,9 @@
 const pool = require("../../config/bd");
 
+function capitalizarPrimeraLetra(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 const orderProduct = (dbData) => {
   allData = dbData.rows.map((d) => {
     return {
@@ -139,7 +143,7 @@ const deleteProduct = async (req, res) => {
 const filterByCategory = async (req, res) => {
   let { category } = req.query;
   try {
-    category = category.toLowerCase();
+    category = capitalizarPrimeraLetra(category);
     let products = await pool.query(`SELECT * FROM products
     INNER JOIN products_category ON products_category.id_product = products.id_products
     INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}'`);

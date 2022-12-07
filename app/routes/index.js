@@ -31,7 +31,7 @@ router.delete("/product/:id", deleteProduct);
 router.get("/product/:id", getProductById);
 router.get("/products/categories", getCategories);
 router.post("/products/category", createCategory);
-router.get("/products/filterByCategory", filterByCategory)
+router.get("/products/filterByCategory", filterByCategory);
 
 router.get("*", (req, res) => {
   res.status(404).send({ Error: "Not Found" });
