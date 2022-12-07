@@ -7,7 +7,9 @@ const { createProduct,
     getCategories,
     createCategory,
     filterByCategory,
-    updateProduct,} =require ('../controllers/products')
+    updateProduct,
+    priceOrder,
+    timePreparationOrder,} =require ('../controllers/products')
 
     
    
@@ -19,6 +21,7 @@ const { createProduct,
     router.get("/:id", getProductById);
     router.post("/", createProduct);
     router.get("/", getProducts);
-   
+    router.get("/priceOrder", priceOrder)
+    router.get("/timePreparationOrder", timePreparationOrder)
 
 module.exports = router

@@ -188,6 +188,36 @@ const filterByCategory = async (req, res) => {
   }
 };
 
+const timePreparationOrder = async (req, res)=>{
+  try {
+    let allData;
+    let alltimes = await pool.query(
+    `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
+        inner join products_category ON products_category.id_product = products.id_products
+        inner join category on category.id_category = products_category.id_categorie order by products.prep_time asc`
+    )
+    allData = orderProduct(alltimes);
+    res.json(allData)
+  }catch (error) {
+    res.json(error.message);
+  }
+}
+
+const priceOrder = async (req, res)=>{
+  try {
+    let allData;
+    const allprice = await pool.query(
+      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
+        inner join products_category ON products_category.id_product = products.id_products
+        inner join category on category.id_category = products_category.id_categorie order by products.price asc`
+    )
+    allData = orderProduct(allprice);
+    res.json(allData)
+  }catch (error) {
+    res.json(error.message);
+  }
+}
+
 module.exports = {
   createProduct,
   getProducts,
@@ -197,4 +227,6 @@ module.exports = {
   createCategory,
   filterByCategory,
   updateProduct,
+  priceOrder,
+  timePreparationOrder,
 };
