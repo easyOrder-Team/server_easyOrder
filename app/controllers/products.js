@@ -1,6 +1,10 @@
 const { response } = require("express");
 const pool = require("../../config/bd");
 
+function capitalizarPrimeraLetra(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 const orderProduct = (dbData) => {
   allData = dbData.rows.map((d) => {
     return {
@@ -192,9 +196,9 @@ const timePreparationOrder = async (req, res)=>{
   try {
     let allData;
     let alltimes = await pool.query(
-    `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-        inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie order by products.prep_time asc`
+      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
+      inner join products_category ON products_category.id_product = products.id_products
+      inner join category on category.id_category = products_category.id_categorie order by products.prep_time asc`
     )
     allData = orderProduct(alltimes);
     res.json(allData)
