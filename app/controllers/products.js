@@ -30,13 +30,16 @@ const orderProduct = (dbData) => {
   return notRepeat;
 };
 
+function capitalizarPrimeraLetra(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
       req.body;
     let allCategories = await pool.query("SELECT * FROM category;");
     allCategories = allCategories.rows;
-    console.log(allCategories);
     await pool.query(
       `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
     );
@@ -102,6 +105,20 @@ const getProducts = async (req, res) => {
   }
 };
 
+const getDisablesProducts = async (req, res) => {
+  try {
+    const dbData = await pool.query(
+      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
+      inner join products_category ON products_category.id_product = products.id_products
+      inner join category on category.id_category = products_category.id_categorie WHERE stock = False`
+    );
+    allData = orderProduct(dbData);
+    return res.json(allData);
+  } catch (error) {
+    res.json(error.message);
+  }
+}
+
 const getCategories = async (req, res) => {
   try {
     const categories = await pool.query("SELECT name_c FROM category;");
@@ -113,6 +130,7 @@ const getCategories = async (req, res) => {
 
 const createCategory = (req, res) => {
   let { name } = req.body;
+  name = capitalizarPrimeraLetra(name)
   try {
     name = name.toLowerCase();
     pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
@@ -135,6 +153,24 @@ const deleteProduct = async (req, res) => {
     if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
       throw new Error("Product not found");
     return res.json("the product has been deleted");
+  } catch (error) {
+    res.json(error);
+  }
+};
+
+const ActiveProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleteFromMidleTable = await pool.query(
+      `UPDATE products_category SET active = True WHERE id_product = ${id}`
+    );
+    const deletedProduct = await pool.query(
+      `UPDATE products SET stock = True WHERE id_products = ${id}`
+    );
+    if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
+      throw new Error("Product not found");
+    return res.json("the product has been active");
   } catch (error) {
     res.json(error);
   }
@@ -176,7 +212,7 @@ const updateProduct = async (req, res) => {
 const filterByCategory = async (req, res) => {
   let { category } = req.query;
   try {
-    category = category.toLowerCase();
+    category = capitalizarPrimeraLetra(category);
     let products = await pool.query(`SELECT * FROM products
     INNER JOIN products_category ON products_category.id_product = products.id_products
     INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}'`);
@@ -228,5 +264,7 @@ module.exports = {
   filterByCategory,
   updateProduct,
   priceOrder,
+  ActiveProduct,
   timePreparationOrder,
+  getDisablesProducts
 };
