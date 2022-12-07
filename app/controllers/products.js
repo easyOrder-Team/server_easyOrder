@@ -84,7 +84,7 @@ const getProducts = async (req, res) => {
       const dbData = await pool.query(
         `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
        INNER JOIN products_category ON products_category.id_product = products.id_products
-       INNER JOIN category ON category.id_category = products_category.id_categorie WHERE LOWER(products.name) ~ LOWER('${name}')`
+       INNER JOIN category ON category.id_category = products_category.id_categorie WHERE LOWER(products.name) ~ LOWER('${name}') AND stock = true`
       );
       allData = orderProduct(dbData);
       return res.json(allData);
@@ -92,7 +92,7 @@ const getProducts = async (req, res) => {
       const dbData = await pool.query(
         `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
         inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie`
+        inner join category on category.id_category = products_category.id_categorie WHERE stock = true`
       );
       allData = orderProduct(dbData);
       return res.json(allData);
@@ -127,10 +127,12 @@ const deleteProduct = async (req, res) => {
     const { id } = req.params;
 
     const deleteFromMidleTable = await pool.query(
-      `DELETE FROM products_category WHERE id_product = ${id}`
+      // `DELETE FROM products_category WHERE id_product = ${id}` 
+      `UPDATE products_category SET active = False WHERE id_product = ${id}`
     );
     const deletedProduct = await pool.query(
-      `DELETE FROM products WHERE id_products = ${id}`
+      // `DELETE FROM products WHERE id_products = ${id}`
+      `UPDATE products SET stock = False WHERE id_products = ${id}`
     );
     if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
       throw new Error("Product not found");
