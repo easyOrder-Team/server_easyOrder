@@ -24,8 +24,7 @@ const { createProduct,
     router.get("/:id", getProductById);
     router.post("/", createProduct);
     router.get("/", getProducts);
-    router.get("/filter/filter/priceOrder", priceOrder)
-    router.get("/filter/filter/timePreparationOrder", timePreparationOrder)
-    router.put('/:id', ActiveProduct) // activa el product
+    router.get("/priceOrder", priceOrder)
+    router.get("/timePreparationOrder", timePreparationOrder)
 
 module.exports = router
