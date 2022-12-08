@@ -30,10 +30,6 @@ const orderProduct = (dbData) => {
   return notRepeat;
 };
 
-function capitalizarPrimeraLetra(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
@@ -87,7 +83,7 @@ const getProducts = async (req, res) => {
       const dbData = await pool.query(
         `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
        INNER JOIN products_category ON products_category.id_product = products.id_products
-       INNER JOIN category ON category.id_category = products_category.id_categorie WHERE LOWER(products.name) ~ LOWER('${name}') AND stock = true`
+       INNER JOIN category ON category.id_category = products_category.id_categorie WHERE LOWER(products.name) ~ LOWER('${name}')`
       );
       allData = orderProduct(dbData);
       return res.json(allData);
@@ -95,7 +91,7 @@ const getProducts = async (req, res) => {
       const dbData = await pool.query(
         `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
         inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie WHERE stock = true`
+        inner join category on category.id_category = products_category.id_categorie`
       );
       allData = orderProduct(dbData);
       return res.json(allData);
@@ -104,20 +100,6 @@ const getProducts = async (req, res) => {
     res.json(error.message);
   }
 };
-
-const getDisablesProducts = async (req, res) => {
-  try {
-    const dbData = await pool.query(
-      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-      inner join products_category ON products_category.id_product = products.id_products
-      inner join category on category.id_category = products_category.id_categorie WHERE stock = False`
-    );
-    allData = orderProduct(dbData);
-    return res.json(allData);
-  } catch (error) {
-    res.json(error.message);
-  }
-}
 
 const getCategories = async (req, res) => {
   try {
@@ -130,7 +112,6 @@ const getCategories = async (req, res) => {
 
 const createCategory = (req, res) => {
   let { name } = req.body;
-  name = capitalizarPrimeraLetra(name)
   try {
     name = name.toLowerCase();
     pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
@@ -145,32 +126,14 @@ const deleteProduct = async (req, res) => {
     const { id } = req.params;
 
     const deleteFromMidleTable = await pool.query(
-      `UPDATE products_category SET active = False WHERE id_product = ${id}`
+      `DELETE FROM products_category WHERE id_product = ${id}`
     );
     const deletedProduct = await pool.query(
-      `UPDATE products SET stock = False WHERE id_products = ${id}`
+      `DELETE FROM products WHERE id_products = ${id}`
     );
     if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
       throw new Error("Product not found");
     return res.json("the product has been deleted");
-  } catch (error) {
-    res.json(error);
-  }
-};
-
-const ActiveProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const deleteFromMidleTable = await pool.query(
-      `UPDATE products_category SET active = True WHERE id_product = ${id}`
-    );
-    const deletedProduct = await pool.query(
-      `UPDATE products SET stock = True WHERE id_products = ${id}`
-    );
-    if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
-      throw new Error("Product not found");
-    return res.json("the product has been active");
   } catch (error) {
     res.json(error);
   }
@@ -212,7 +175,7 @@ const updateProduct = async (req, res) => {
 const filterByCategory = async (req, res) => {
   let { category } = req.query;
   try {
-    category = capitalizarPrimeraLetra(category);
+    category = category.toLowerCase();
     let products = await pool.query(`SELECT * FROM products
     INNER JOIN products_category ON products_category.id_product = products.id_products
     INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}'`);
@@ -224,36 +187,6 @@ const filterByCategory = async (req, res) => {
   }
 };
 
-const timePreparationOrder = async (req, res)=>{
-  try {
-    let allData;
-    let alltimes = await pool.query(
-    `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-        inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie order by products.prep_time asc`
-    )
-    allData = orderProduct(alltimes);
-    res.json(allData)
-  }catch (error) {
-    res.json(error.message);
-  }
-}
-
-const priceOrder = async (req, res)=>{
-  try {
-    let allData;
-    const allprice = await pool.query(
-      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-        inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie order by products.price asc`
-    )
-    allData = orderProduct(allprice);
-    res.json(allData)
-  }catch (error) {
-    res.json(error.message);
-  }
-}
-
 module.exports = {
   createProduct,
   getProducts,
@@ -263,8 +196,4 @@ module.exports = {
   createCategory,
   filterByCategory,
   updateProduct,
-  priceOrder,
-  ActiveProduct,
-  timePreparationOrder,
-  getDisablesProducts
 };
