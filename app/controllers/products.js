@@ -1,10 +1,6 @@
 const { response } = require("express");
 const pool = require("../../config/bd");
 
-function capitalizarPrimeraLetra(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
 const orderProduct = (dbData) => {
   allData = dbData.rows.map((d) => {
     return {
@@ -54,7 +50,9 @@ const createProduct = async (req, res) => {
 
     for (let i = 0; i < allCategories.length; i++) {
       for (let j = 0; j < categories.length; j++) {
-        if (allCategories[i].name_c === categories[j].toLowerCase()) {
+        if (
+          allCategories[i].name_c === capitalizarPrimeraLetra(categories[j])
+        ) {
           await pool.query(
             `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
           );
@@ -121,7 +119,7 @@ const getDisablesProducts = async (req, res) => {
   } catch (error) {
     res.json(error.message);
   }
-}
+};
 
 const getCategories = async (req, res) => {
   try {
@@ -134,9 +132,8 @@ const getCategories = async (req, res) => {
 
 const createCategory = (req, res) => {
   let { name } = req.body;
-  name = capitalizarPrimeraLetra(name)
   try {
-    name = name.toLowerCase();
+    name = capitalizarPrimeraLetra(name);
     pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
     res.sendStatus(201);
   } catch (error) {
@@ -228,35 +225,35 @@ const filterByCategory = async (req, res) => {
   }
 };
 
-const timePreparationOrder = async (req, res)=>{
+const timePreparationOrder = async (req, res) => {
   try {
     let allData;
     let alltimes = await pool.query(
-    `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-        inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie order by products.prep_time asc`
-    )
+      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
+      inner join products_category ON products_category.id_product = products.id_products
+      inner join category on category.id_category = products_category.id_categorie order by products.prep_time asc`
+    );
     allData = orderProduct(alltimes);
-    res.json(allData)
-  }catch (error) {
+    res.json(allData);
+  } catch (error) {
     res.json(error.message);
   }
-}
+};
 
-const priceOrder = async (req, res)=>{
+const priceOrder = async (req, res) => {
   try {
     let allData;
     const allprice = await pool.query(
       `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
         inner join products_category ON products_category.id_product = products.id_products
         inner join category on category.id_category = products_category.id_categorie order by products.price asc`
-    )
+    );
     allData = orderProduct(allprice);
-    res.json(allData)
-  }catch (error) {
+    res.json(allData);
+  } catch (error) {
     res.json(error.message);
   }
-}
+};
 
 module.exports = {
   createProduct,
@@ -270,5 +267,5 @@ module.exports = {
   priceOrder,
   ActiveProduct,
   timePreparationOrder,
-  getDisablesProducts
+  getDisablesProducts,
 };
