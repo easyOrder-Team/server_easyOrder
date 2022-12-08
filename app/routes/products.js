@@ -9,8 +9,8 @@ const { createProduct,
     filterByCategory,
     updateProduct,
     priceOrder,
-    ActiveProduct,
-    getDisablesProducts,
+    // ActiveProduct,
+    // getDisablesProducts,
     timePreparationOrder,} =require ('../controllers/products')
 
     

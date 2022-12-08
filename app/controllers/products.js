@@ -227,4 +227,8 @@ module.exports = {
   createCategory,
   filterByCategory,
   updateProduct,
+  priceOrder,
+  // ActiveProduct,
+  // getDisablesProducts,
+  timePreparationOrder
 };
