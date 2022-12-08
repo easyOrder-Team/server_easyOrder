@@ -50,7 +50,7 @@ const createProduct = async (req, res) => {
 
     for (let i = 0; i < allCategories.length; i++) {
       for (let j = 0; j < categories.length; j++) {
-        if (allCategories[i].name_c === categories[j].toLowerCase()) {
+        if (allCategories[i].name_c === capitalizarPrimeraLetra(categories[j])) {
           await pool.query(
             `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
           );
@@ -130,9 +130,9 @@ const getCategories = async (req, res) => {
 
 const createCategory = (req, res) => {
   let { name } = req.body;
-  name = capitalizarPrimeraLetra(name)
+  
   try {
-    name = name.toLowerCase();
+    name = capitalizarPrimeraLetra(name)
     pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
     res.sendStatus(201);
   } catch (error) {
