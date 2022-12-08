@@ -1,9 +1,6 @@
 const { response } = require("express");
 const pool = require("../../config/bd");
 
-function capitalizarPrimeraLetra(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
 
 const orderProduct = (dbData) => {
   allData = dbData.rows.map((d) => {
@@ -54,7 +51,7 @@ const createProduct = async (req, res) => {
 
     for (let i = 0; i < allCategories.length; i++) {
       for (let j = 0; j < categories.length; j++) {
-        if (allCategories[i].name_c === categories[j].toLowerCase()) {
+        if (allCategories[i].name_c === capitalizarPrimeraLetra(categories[j])) {
           await pool.query(
             `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
           );
@@ -134,9 +131,8 @@ const getCategories = async (req, res) => {
 
 const createCategory = (req, res) => {
   let { name } = req.body;
-  name = capitalizarPrimeraLetra(name)
   try {
-    name = name.toLowerCase();
+    name = capitalizarPrimeraLetra(name);
     pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
     res.sendStatus(201);
   } catch (error) {
