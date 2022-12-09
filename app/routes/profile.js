@@ -1,5 +1,4 @@
-const express = require('express');
-const { createProfile, deleteUser, activeUser, getDisablesUser } = require('../controllers/profile');
+const express = require("express");
 const router = express.Router();
 
 
@@ -8,29 +7,26 @@ const router = express.Router();
 
 
 
-router.post('/', createProfile)
+router.post('/', 
+  createProfile,
+  updateProfile,
+  becomeAdmin,
+  getAllProfile,
+  getProfile,
+)
 
 
 
 
-router.delete('/:id', deleteUser)
+router.delete("/:id', deleteUser)
 router.put('/:id', activeUser)
-router.get('/disables', getDisablesUser)
+router.get('/disables", getDisablesUser);
 
 
-router.post('/', createProfile)
+router.post("/", createProfile);
+router.put("/updateProfile/:id", updateProfile);
+router.put("/:id", becomeAdmin);
+router.get("/", getAllProfile);
+router.get("/:id", getProfile);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = router
+module.exports = router;
