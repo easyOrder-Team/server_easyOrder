@@ -4,10 +4,14 @@ const {
   createProfile,
   updateProfile,
   becomeAdmin,
+  getAllProfile,
+  getProfile,
 } = require("../controllers/profile");
 
 router.post("/", createProfile);
 router.put("/updateProfile/:id", updateProfile);
-router.get("/:id", becomeAdmin);
+router.put("/:id", becomeAdmin);
+router.get("/", getAllProfile);
+router.get("/:id", getProfile);
 
 module.exports = router;

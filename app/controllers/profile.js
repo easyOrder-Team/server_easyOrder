@@ -54,8 +54,31 @@ const becomeAdmin = async (req, res) => {
   }
 };
 
+const getAllProfile = async (req, res) => {
+  try {
+    let allProfile = await pool.query("SELECT * FROM profile");
+    res.json(allProfile.rows);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+};
+
+const getProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let allProfile = await pool.query(
+      `SELECT * FROM profile WHERE Id_profile = '${id}'`
+    );
+    res.json(allProfile.rows[0]);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createProfile,
   updateProfile,
   becomeAdmin,
+  getAllProfile,
+  getProfile,
 };
