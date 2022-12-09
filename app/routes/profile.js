@@ -8,6 +8,6 @@ const {
 
 router.post("/", createProfile);
 router.put("/updateProfile/:id", updateProfile);
-router.get("profile/:id", becomeAdmin);
+router.get("/:id", becomeAdmin);
 
 module.exports = router;
