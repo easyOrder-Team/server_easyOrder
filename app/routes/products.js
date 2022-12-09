@@ -26,5 +26,6 @@ const { createProduct,
     router.get("/", getProducts);
     router.get("/priceOrder", priceOrder)
     router.get("/timePreparationOrder", timePreparationOrder)
+    router.put('/:id', ActiveProduct)
 
 module.exports = router
