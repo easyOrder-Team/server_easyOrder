@@ -1,6 +1,4 @@
-const { response } = require("express");
 const pool = require("../../config/bd");
-
 
 const orderProduct = (dbData) => {
   allData = dbData.rows.map((d) => {
@@ -51,7 +49,9 @@ const createProduct = async (req, res) => {
 
     for (let i = 0; i < allCategories.length; i++) {
       for (let j = 0; j < categories.length; j++) {
-        if (allCategories[i].name_c === capitalizarPrimeraLetra(categories[j])) {
+        if (
+          allCategories[i].name_c === capitalizarPrimeraLetra(categories[j])
+        ) {
           await pool.query(
             `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
           );
@@ -94,9 +94,9 @@ const getProducts = async (req, res) => {
       return res.json(allData);
     } else {
       const dbData = await pool.query(
-        `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-        inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie WHERE stock = true`
+        `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
+        INNER JOIN products_category ON products_category.id_product = products.id_products
+        INNER JOIN category ON category.id_category = products_category.id_categorie WHERE stock = true`
       );
       allData = orderProduct(dbData);
       return res.json(allData);
@@ -109,16 +109,16 @@ const getProducts = async (req, res) => {
 const getDisablesProducts = async (req, res) => {
   try {
     const dbData = await pool.query(
-      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-      inner join products_category ON products_category.id_product = products.id_products
-      inner join category on category.id_category = products_category.id_categorie WHERE stock = False`
+      `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
+      INNER JOIN products_category ON products_category.id_product = products.id_products
+      INNER JOIN category ON category.id_category = products_category.id_categorie WHERE stock = False`
     );
     allData = orderProduct(dbData);
     return res.json(allData);
   } catch (error) {
     res.json(error.message);
   }
-}
+};
 
 const getCategories = async (req, res) => {
   try {
@@ -152,7 +152,7 @@ const deleteProduct = async (req, res) => {
     );
     if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
       throw new Error("Product not found");
-    return res.json("the product has been deleted");
+    return res.json("The product has been deleted");
   } catch (error) {
     res.json(error);
   }
@@ -170,7 +170,7 @@ const ActiveProduct = async (req, res) => {
     );
     if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
       throw new Error("Product not found");
-    return res.json("the product has been active");
+    return res.json("The product has been active");
   } catch (error) {
     res.json(error);
   }
@@ -187,8 +187,10 @@ const updateProduct = async (req, res) => {
       const data = await pool.query(
         `UPDATE products SET ${key} = '${value}' WHERE id_products = ${id}`
       );
+      if (data.rowCount.length < 0)
+        throw new Error("You must enter valid information");
     }
-    return res.json("the product has been updated");
+    return res.json("The product has been updated");
   } catch (error) {
     res.json(error.message);
   }
@@ -224,35 +226,35 @@ const filterByCategory = async (req, res) => {
   }
 };
 
-const timePreparationOrder = async (req, res)=>{
+const timePreparationOrder = async (req, res) => {
   try {
     let allData;
     let alltimes = await pool.query(
       `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
       inner join products_category ON products_category.id_product = products.id_products
       inner join category on category.id_category = products_category.id_categorie order by products.prep_time asc`
-    )
+    );
     allData = orderProduct(alltimes);
-    res.json(allData)
-  }catch (error) {
+    res.json(allData);
+  } catch (error) {
     res.json(error.message);
   }
-}
+};
 
-const priceOrder = async (req, res)=>{
+const priceOrder = async (req, res) => {
   try {
     let allData;
     const allprice = await pool.query(
       `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
         inner join products_category ON products_category.id_product = products.id_products
         inner join category on category.id_category = products_category.id_categorie order by products.price asc`
-    )
+    );
     allData = orderProduct(allprice);
-    res.json(allData)
-  }catch (error) {
+    res.json(allData);
+  } catch (error) {
     res.json(error.message);
   }
-}
+};
 
 module.exports = {
   createProduct,
@@ -266,5 +268,5 @@ module.exports = {
   priceOrder,
   ActiveProduct,
   timePreparationOrder,
-  getDisablesProducts
+  getDisablesProducts,
 };
