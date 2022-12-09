@@ -11,5 +11,3 @@ router.put("/updateProfile/:id", updateProfile);
 router.get("profile/:id", becomeAdmin);
 
 module.exports = router;
-
-module.exports = router;
