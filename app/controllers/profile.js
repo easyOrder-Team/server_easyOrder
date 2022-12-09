@@ -23,7 +23,7 @@ const getProfile = async (req, res) => {
     try {
         const {id} = req.params
         let allProfile = await pool.query(`SELECT * FROM profile WHERE Id_profile = '${id}'`)
-        res.json(allProfile.rows) 
+        res.json(allProfile.rows[0]) 
     } catch (error) {
         res.status(404).json({ error: error.message });
     }
