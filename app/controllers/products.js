@@ -37,28 +37,36 @@ const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
       req.body;
-    let allCategories = await pool.query("SELECT * FROM category;");
-    allCategories = allCategories.rows;
-    await pool.query(
-      `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
-    );
-    let newProduct = await pool.query(
-      "SELECT * FROM products WHERE id_products = (SELECT MAX(id_products) FROM products);"
-    );
-    newProduct = newProduct.rows[0].id_products;
 
-    for (let i = 0; i < allCategories.length; i++) {
-      for (let j = 0; j < categories.length; j++) {
-        if (
-          allCategories[i].name_c === capitalizarPrimeraLetra(categories[j])
-        ) {
-          await pool.query(
-            `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
-          );
+    const product = await pool.query(
+      `SELECT name FROM products where name = '${name}'`
+    );
+    if (product.rowCount === 0) {
+      let allCategories = await pool.query("SELECT * FROM category;");
+      allCategories = allCategories.rows;
+      await pool.query(
+        `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
+      );
+      let newProduct = await pool.query(
+        "SELECT * FROM products WHERE id_products = (SELECT MAX(id_products) FROM products);"
+      );
+      newProduct = newProduct.rows[0].id_products;
+
+      for (let i = 0; i < allCategories.length; i++) {
+        for (let j = 0; j < categories.length; j++) {
+          if (
+            allCategories[i].name_c === capitalizarPrimeraLetra(categories[j])
+          ) {
+            await pool.query(
+              `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
+            );
+          }
         }
       }
+      res.sendStatus(201);
+    } else {
+      throw new Error("There is already a product with this name");
     }
-    res.sendStatus(201);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -195,21 +203,6 @@ const updateProduct = async (req, res) => {
     res.json(error.message);
   }
 };
-// const updateProduct = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { name, description, price, image, stock, prep_time, categories } =
-//       req.body;
-//       console.log()
-//     const data = await pool.query(
-//       `UPDATE products SET name = '${name}', description = '${description}', price = ${price}, image = '${image}', stock = ${stock}, prep_time = ${prep_time}, categories = '${categories}' WHERE id_products = ${id}`
-//     );
-//     if (data.rows.length === 0) throw new Error("Product not found");
-//     return res.json("the product has been updated");
-//   } catch (error) {
-//     res.json(error.message);
-//   }
-// };
 
 const filterByCategory = async (req, res) => {
   let { category } = req.query;
