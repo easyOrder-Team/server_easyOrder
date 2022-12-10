@@ -129,12 +129,21 @@ const getCategories = async (req, res) => {
   }
 };
 
-const createCategory = (req, res) => {
+const createCategory = async (req, res) => {
   let { name } = req.body;
+  
   try {
     name = capitalizarPrimeraLetra(name);
-    pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
+    console.log(name)
+    const controlCategory = await pool.query(
+      `SELECT name_c FROM category WHERE name_c = '${name}' `
+    )
+    if (controlCategory.rowCount === 0){
+    await pool.query(`INSERT INTO category(name_c) VALUES ('${name}')`);
     res.sendStatus(201);
+    }else {
+      res.send('this category already exists')
+    }
   } catch (error) {
     res.json(error.message);
   }
@@ -195,21 +204,7 @@ const updateProduct = async (req, res) => {
     res.json(error.message);
   }
 };
-// const updateProduct = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { name, description, price, image, stock, prep_time, categories } =
-//       req.body;
-//       console.log()
-//     const data = await pool.query(
-//       `UPDATE products SET name = '${name}', description = '${description}', price = ${price}, image = '${image}', stock = ${stock}, prep_time = ${prep_time}, categories = '${categories}' WHERE id_products = ${id}`
-//     );
-//     if (data.rows.length === 0) throw new Error("Product not found");
-//     return res.json("the product has been updated");
-//   } catch (error) {
-//     res.json(error.message);
-//   }
-// };
+
 
 const filterByCategory = async (req, res) => {
   let { category } = req.query;

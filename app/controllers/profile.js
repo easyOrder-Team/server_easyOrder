@@ -3,14 +3,23 @@ const pool = require('../../config/bd');
 const createProfile = async (req, res) => {
   const { Id_profile, name, lastname, phone, email } = req.body;
   try {
-    await pool.query(
-      `INSERT INTO profile(Id_profile, name, lastname, phone, email, client) VALUES (${Id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
-    );
-    res.sendStatus(201);
+    console.log(email)
+    const user = await pool.query(`SELECT email FROM profile where email = '${email}'`);
+    console.log(user.rows);
+   
+    if (user.rowCount === 0) {
+      await pool.query(
+        `INSERT INTO profile(Id_profile, name, lastname, phone, email, client) VALUES (${Id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
+      );
+      return res.sendStatus(201);
+    } else {
+          return res.send('there is already a user with this email');
+        } 
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
 };
+
 const updateProfile = async (req, res) => {
   try {
     const { id } = req.params;
@@ -56,7 +65,9 @@ const becomeAdmin = async (req, res) => {
 
 const getAllProfile = async (req, res) => {
   try {
-    let allProfile = await pool.query('SELECT * FROM profile WHERE state = true');
+    let allProfile = await pool.query(
+      'SELECT * FROM profile WHERE state = true'
+    );
     res.json(allProfile.rows);
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -69,10 +80,9 @@ const getProfile = async (req, res) => {
     let allProfile = await pool.query(
       `SELECT * FROM profile WHERE Id_profile = '${id}' and state = true`
     );
-    if (allProfile.length > 0){
-   res.json(allProfile.rows[0]);
-  }
-    else res.json("the user is deactivated")
+    if (allProfile.length > 0) {
+      res.json(allProfile.rows[0]);
+    } else res.json('the user is deactivated');
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -122,5 +132,5 @@ module.exports = {
   getProfile,
   deleteUser,
   getDisablesUser,
-  activeUser
+  activeUser,
 };
