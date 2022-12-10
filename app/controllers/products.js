@@ -137,12 +137,21 @@ const getCategories = async (req, res) => {
   }
 };
 
-const createCategory = (req, res) => {
+const createCategory = async (req, res) => {
   let { name } = req.body;
+
   try {
     name = capitalizarPrimeraLetra(name);
-    pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
-    res.sendStatus(201);
+    console.log(name);
+    const controlCategory = await pool.query(
+      `SELECT name_c FROM category WHERE name_c = '${name}' `
+    );
+    if (controlCategory.rowCount === 0) {
+      await pool.query(`INSERT INTO category(name_c) VALUES ('${name}')`);
+      res.sendStatus(201);
+    } else {
+      res.send("this category already exists");
+    }
   } catch (error) {
     res.json(error.message);
   }
