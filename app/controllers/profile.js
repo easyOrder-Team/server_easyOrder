@@ -67,9 +67,12 @@ const getProfile = async (req, res) => {
   try {
     const { id } = req.params;
     let allProfile = await pool.query(
-      `SELECT * FROM profile WHERE Id_profile = '${id}'`
+      `SELECT * FROM profile WHERE Id_profile = '${id}' and state = true`
     );
-    res.json(allProfile.rows[0]);
+    if (allProfile.length > 0){
+   res.json(allProfile.rows[0]);
+  }
+    else res.json("the user is deactivated")
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
