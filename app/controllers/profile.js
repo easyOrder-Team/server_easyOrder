@@ -3,10 +3,7 @@ const pool = require('../../config/bd');
 const createProfile = async (req, res) => {
   const { Id_profile, name, lastname, phone, email } = req.body;
   try {
-    console.log(email)
-    const user = await pool.query(`SELECT email FROM profile where email = '${email}'`);
-    console.log(user.rows);
-   
+    const user = await pool.query(`SELECT email FROM profile where email = '${email}'`);   
     if (user.rowCount === 0) {
       await pool.query(
         `INSERT INTO profile(Id_profile, name, lastname, phone, email, client) VALUES (${Id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
