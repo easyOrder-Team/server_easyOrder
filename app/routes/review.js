@@ -12,5 +12,3 @@ router.get("/:id", getReview);
 router.delete("/:id", deleteReview);
 
 module.exports = router;
-
-module.exports = router;
