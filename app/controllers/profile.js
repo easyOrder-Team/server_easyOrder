@@ -1,17 +1,22 @@
-const pool = require('../../config/bd');
+const pool = require("../../config/bd");
 
 const createProfile = async (req, res) => {
   const { Id_profile, name, lastname, phone, email } = req.body;
   try {
-    const user = await pool.query(`SELECT email FROM profile where email = '${email}'`);   
+    console.log(email);
+    const user = await pool.query(
+      `SELECT email FROM profile where email = '${email}'`
+    );
+    console.log(user.rows);
+
     if (user.rowCount === 0) {
       await pool.query(
         `INSERT INTO profile(Id_profile, name, lastname, phone, email, client) VALUES (${Id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
       );
       return res.sendStatus(201);
     } else {
-          return res.send('there is already a user with this email');
-        } 
+      return res.send("There is already a user with this email");
+    }
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -29,9 +34,9 @@ const updateProfile = async (req, res) => {
         `UPDATE profile SET ${key} = '${value}' WHERE id_profile = ${id}`
       );
       if (data.rowCount.length < 0)
-        throw new Error('You must enter valid information');
+        throw new Error("You must enter valid information");
     }
-    return res.json('The profile was successfully updated');
+    return res.json("The profile was successfully updated");
   } catch (error) {
     res.json(error.message);
   }
@@ -53,7 +58,7 @@ const becomeAdmin = async (req, res) => {
     }
 
     if (data.rowCount.length < 0)
-      throw new Error('This profile does not exist');
+      throw new Error("This profile does not exist");
     return res.json(okMessage);
   } catch (error) {
     res.json(error.message);
@@ -63,7 +68,7 @@ const becomeAdmin = async (req, res) => {
 const getAllProfile = async (req, res) => {
   try {
     let allProfile = await pool.query(
-      'SELECT * FROM profile WHERE state = true'
+      "SELECT * FROM profile WHERE state = true"
     );
     res.json(allProfile.rows);
   } catch (error) {
@@ -79,7 +84,7 @@ const getProfile = async (req, res) => {
     );
     if (allProfile.length > 0) {
       res.json(allProfile.rows[0]);
-    } else res.json('the user is deactivated');
+    } else res.json("the user is deactivated");
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -91,7 +96,7 @@ const deleteUser = async (req, res) => {
     const dbData = await pool.query(
       `UPDATE profile SET state = false WHERE id_profile = ${id}`
     );
-    return res.send('User Deleted');
+    return res.send("User Deleted");
   } catch (error) {
     res.json(error.message);
   }
@@ -103,7 +108,7 @@ const activeUser = async (req, res) => {
     await pool.query(
       `UPDATE profile SET state = true WHERE id_profile = ${id}`
     );
-    return res.send('User Actived');
+    return res.send("User Actived");
   } catch (error) {
     res.json(error.message);
   }
