@@ -40,7 +40,3 @@ const getReview = async (req, res) => {
 };
 
 module.exports = { createReview, deleteReview, getReview };
-
-module.exports = {
-    createReview
-  };
