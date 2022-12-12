@@ -3,14 +3,17 @@ const pool = require("../../config/bd");
 const createProfile = async (req, res) => {
   const { id_profile, name, lastname, phone, email } = req.body;
   try {
+
     await pool.query(
       `INSERT INTO profile(id_profile, name, lastname, phone, email, client) VALUES (${id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
     );
     res.sendStatus(201);
+
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
 };
+
 const updateProfile = async (req, res) => {
   try {
     const { id } = req.params;
@@ -57,6 +60,7 @@ const becomeAdmin = async (req, res) => {
 const getAllProfile = async (req, res) => {
   try {
     let allProfile = await pool.query(
+
       "SELECT * FROM profile WHERE state = true"
     );
 
@@ -64,7 +68,6 @@ const getAllProfile = async (req, res) => {
       return res.json(`There are no available Profiles yet.`);
     } else {
       res.json(allProfile.rows);
-    }
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -76,11 +79,14 @@ const getProfile = async (req, res) => {
     let allProfile = await pool.query(
       `SELECT * FROM profile WHERE Id_profile = '${id}' and state = true`
     );
+
     if (allProfile.rows.length <= 0) {
       res.json("There is no active User for that ID");
     } else {
       res.json(allProfile.rows[0]);
     }
+
+  
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
