@@ -11,12 +11,12 @@ const {
   updateProduct,
   priceOrder,
   ActiveProduct,
-  getDisablesProducts,
+  getDisabledProducts,
   timePreparationOrder,
 } = require("../controllers/products");
 
 router.get("/categories", getCategories);
-router.get("/disables", getDisablesProducts);
+router.get("/disabled", getDisabledProducts);
 router.post("/category", createCategory);
 router.get("/filter/filterByCategory", filterByCategory);
 router.put("/update/:id", updateProduct);
@@ -24,8 +24,8 @@ router.delete("/:id", deleteProduct);
 router.get("/:id", getProductById);
 router.post("/", createProduct);
 router.get("/", getProducts);
-router.get("/filter/filter/priceOrder", priceOrder);
-router.get("/filter/filter/timePreparationOrder", timePreparationOrder);
-router.put("/:id", ActiveProduct); // activa el product
+router.get("/priceOrder", priceOrder);
+router.get("/timePreparationOrder", timePreparationOrder);
+router.put("/:id", ActiveProduct);
 
 module.exports = router;
