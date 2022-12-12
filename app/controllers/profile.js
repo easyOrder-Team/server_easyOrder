@@ -68,7 +68,8 @@ const getAllProfile = async (req, res) => {
       return res.json(`There are no available Profiles yet.`);
     } else {
       res.json(allProfile.rows);
-  } catch (error) {
+  }
+ } catch (error) {
     res.status(404).json({ error: error.message });
   }
 };
