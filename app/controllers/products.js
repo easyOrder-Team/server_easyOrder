@@ -29,7 +29,7 @@ const orderProduct = (dbData) => {
   return notRepeat;
 };
 
-function capitalizarPrimeraLetra(str) {
+function firstCapital(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
@@ -37,28 +37,34 @@ const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, stock, prep_time, categories } =
       req.body;
-    let allCategories = await pool.query("SELECT * FROM category;");
-    allCategories = allCategories.rows;
-    await pool.query(
-      `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
-    );
-    let newProduct = await pool.query(
-      "SELECT * FROM products WHERE id_products = (SELECT MAX(id_products) FROM products);"
-    );
-    newProduct = newProduct.rows[0].id_products;
 
-    for (let i = 0; i < allCategories.length; i++) {
-      for (let j = 0; j < categories.length; j++) {
-        if (
-          allCategories[i].name_c === capitalizarPrimeraLetra(categories[j])
-        ) {
-          await pool.query(
-            `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
-          );
+    const product = await pool.query(
+      `SELECT name FROM products where name = '${name}'`
+    );
+    if (product.rowCount === 0) {
+      let allCategories = await pool.query("SELECT * FROM category;");
+      allCategories = allCategories.rows;
+      await pool.query(
+        `INSERT INTO products(name, description, price, image, stock, prep_time) VALUES ('${name}', '${description}', '${price}', '${image}', '${stock}', '${prep_time}');`
+      );
+      let newProduct = await pool.query(
+        "SELECT * FROM products WHERE id_products = (SELECT MAX(id_products) FROM products);"
+      );
+      newProduct = newProduct.rows[0].id_products;
+
+      for (let i = 0; i < allCategories.length; i++) {
+        for (let j = 0; j < categories.length; j++) {
+          if (allCategories[i].name_c === firstCapital(categories[j])) {
+            await pool.query(
+              `INSERT INTO products_category (id_product,id_categorie) VALUES('${newProduct}','${allCategories[i].id_category}' )`
+            );
+          }
         }
       }
+      res.sendStatus(201);
+    } else {
+      throw new Error("There is already a product with this name");
     }
-    res.sendStatus(201);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -90,31 +96,42 @@ const getProducts = async (req, res) => {
        INNER JOIN products_category ON products_category.id_product = products.id_products
        INNER JOIN category ON category.id_category = products_category.id_categorie WHERE LOWER(products.name) ~ LOWER('${name}') AND stock = true`
       );
-      allData = orderProduct(dbData);
-      return res.json(allData);
+      if (dbData.rows.length <= 0) {
+        return res.json(`There are no products related to ${name} yet.`);
+      } else {
+        allData = orderProduct(dbData);
+        return res.json(allData);
+      }
     } else {
       const dbData = await pool.query(
         `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
         INNER JOIN products_category ON products_category.id_product = products.id_products
         INNER JOIN category ON category.id_category = products_category.id_categorie WHERE stock = true`
       );
-      allData = orderProduct(dbData);
-      return res.json(allData);
+      if (dbData.rows.length <= 0) {
+        return res.json(`There are no products yet.`);
+      } else {
+        allData = orderProduct(dbData);
+        return res.json(allData);
+      }
     }
   } catch (error) {
     res.json(error.message);
   }
 };
 
-const getDisablesProducts = async (req, res) => {
+const getDisabledProducts = async (req, res) => {
   try {
     const dbData = await pool.query(
       `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
       INNER JOIN products_category ON products_category.id_product = products.id_products
       INNER JOIN category ON category.id_category = products_category.id_categorie WHERE stock = False`
     );
-    allData = orderProduct(dbData);
-    return res.json(allData);
+    if (dbData.rows.length <= 0) {
+      return res.json(`There are no disabled products yet.`);
+    } else {
+      return res.json(dbData);
+    }
   } catch (error) {
     res.json(error.message);
   }
@@ -123,7 +140,12 @@ const getDisablesProducts = async (req, res) => {
 const getCategories = async (req, res) => {
   try {
     const categories = await pool.query("SELECT name_c FROM category;");
-    res.send(categories.rows);
+
+    if (categories.rows.length <= 0) {
+      return res.json(`There are no categories yet.`);
+    } else {
+      return res.json(categories.rows);
+    }
   } catch (error) {
     res.json(error.message);
   }
@@ -133,17 +155,10 @@ const createCategory = async (req, res) => {
   let { name } = req.body;
   
   try {
-    name = capitalizarPrimeraLetra(name);
-    console.log(name)
-    const controlCategory = await pool.query(
-      `SELECT name_c FROM category WHERE name_c = '${name}' `
-    )
-    if (controlCategory.rowCount === 0){
-    await pool.query(`INSERT INTO category(name_c) VALUES ('${name}')`);
+
+    name = firstCapital(name);
+    pool.query(`INSERT INTO category(name_c) VALUES ('${name}')`);
     res.sendStatus(201);
-    }else {
-      res.send('this category already exists')
-    }
   } catch (error) {
     res.json(error.message);
   }
@@ -179,7 +194,7 @@ const ActiveProduct = async (req, res) => {
     );
     if (deletedProduct.rowCount === 0 || deleteFromMidleTable.rowCount === 0)
       throw new Error("Product not found");
-    return res.json("The product has been active");
+    return res.json("The product is now available");
   } catch (error) {
     res.json(error);
   }
@@ -209,13 +224,17 @@ const updateProduct = async (req, res) => {
 const filterByCategory = async (req, res) => {
   let { category } = req.query;
   try {
-    category = capitalizarPrimeraLetra(category);
+    category = firstCapital(category);
     let products = await pool.query(`SELECT * FROM products
     INNER JOIN products_category ON products_category.id_product = products.id_products
     INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}'`);
 
     products = orderProduct(products);
-    res.json(products);
+    if (products.length <= 0) {
+      res.json(`There are no products in ${category} yet.`);
+    } else {
+      res.json(products);
+    }
   } catch (error) {
     res.json(error.message);
   }
@@ -225,9 +244,9 @@ const timePreparationOrder = async (req, res) => {
   try {
     let allData;
     let alltimes = await pool.query(
-      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-      inner join products_category ON products_category.id_product = products.id_products
-      inner join category on category.id_category = products_category.id_categorie order by products.prep_time asc`
+      `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
+      INNER JOIN products_category ON products_category.id_product = products.id_products
+      INNER JOIN category ON category.id_category = products_category.id_categorie ORDER BY products.prep_time ASC`
     );
     allData = orderProduct(alltimes);
     res.json(allData);
@@ -240,9 +259,9 @@ const priceOrder = async (req, res) => {
   try {
     let allData;
     const allprice = await pool.query(
-      `select products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c from products
-        inner join products_category ON products_category.id_product = products.id_products
-        inner join category on category.id_category = products_category.id_categorie order by products.price asc`
+      `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
+        INNER JOIN products_category ON products_category.id_product = products.id_products
+        INNER JOIN category on category.id_category = products_category.id_categorie ORDER BY products.price ASC`
     );
     allData = orderProduct(allprice);
     res.json(allData);
@@ -263,5 +282,5 @@ module.exports = {
   priceOrder,
   ActiveProduct,
   timePreparationOrder,
-  getDisablesProducts,
+  getDisabledProducts,
 };
