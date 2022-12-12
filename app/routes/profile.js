@@ -6,7 +6,7 @@ const {
   becomeAdmin,
   getAllProfile,
   getProfile,
-  getDisablesUser,
+  getDisabledUser,
   activeUser,
   deleteUser,
 } = require("../controllers/profile");
@@ -16,7 +16,7 @@ router.put("/updateProfile/:id", updateProfile);
 router.put("/:id", becomeAdmin);
 router.get("/", getAllProfile);
 router.get("/:id", getProfile);
-router.get("/filter/disables", getDisablesUser);
+router.get("/filter/disabled", getDisabledUser);
 router.delete("/:id", deleteUser);
 router.put("/active/:id", activeUser);
 

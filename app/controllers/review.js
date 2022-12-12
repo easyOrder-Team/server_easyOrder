@@ -25,7 +25,7 @@ const deleteReview = async (req, res) => {
   }
 };
 
-const getReview = async (req, res) => {
+const getReviewById = async (req, res) => {
   try {
     const { id } = req.params;
     const profileReview = await pool.query(
@@ -39,4 +39,14 @@ const getReview = async (req, res) => {
   }
 };
 
-module.exports = { createReview, deleteReview, getReview };
+const getReviews = async (req, res) => {
+  try {
+    const reviews = await pool.query(`SELECT * FROM review`);
+    if (reviews.rowCount === 0) throw new Error("There are no reviews yet.");
+    return res.json(reviews.rows[0]);
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+};
+
+module.exports = { createReview, deleteReview, getReviewById, getReviews };
