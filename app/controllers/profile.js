@@ -2,7 +2,7 @@ const pool = require("../../config/bd");
 
 const createProfile = async (req, res) => {
   const { id_profile, name, lastname, phone, email,picture } = req.body;
-  console.log(req.body)
+  
   try {
 
     await pool.query(
