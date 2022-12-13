@@ -153,7 +153,7 @@ const getCategories = async (req, res) => {
 
 const createCategory = async (req, res) => {
   let { name } = req.body;
-  
+
   try {
 
     name = firstCapital(name);

@@ -11,7 +11,7 @@ const createProfile = async (req, res) => {
 
     if (user.rowCount === 0) {
       await pool.query(
-        `INSERT INTO profile(id_profile, name, lastname, phone, email, client) VALUES (${id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
+        `INSERT INTO profile(Id_profile, name, lastname, phone, email, client) VALUES (${Id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
       );
       return res.sendStatus(201);
     } else {
