@@ -155,8 +155,9 @@ const createCategory = async (req, res) => {
   let { name } = req.body;
 
   try {
+
     name = firstCapital(name);
-    pool.query(`INSERT INTO category(name_c) VALUES ('${name}');`);
+    pool.query(`INSERT INTO category(name_c) VALUES ('${name}')`);
     res.sendStatus(201);
   } catch (error) {
     res.json(error.message);
@@ -218,6 +219,7 @@ const updateProduct = async (req, res) => {
     res.json(error.message);
   }
 };
+
 
 const filterByCategory = async (req, res) => {
   let { category } = req.query;
