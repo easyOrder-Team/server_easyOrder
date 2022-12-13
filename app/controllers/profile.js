@@ -1,9 +1,8 @@
 const pool = require("../../config/bd");
 
 const createProfile = async (req, res) => {
-  const { id_profile, name, lastname, phone, email } = req.body;
+  const { Id_profile, name, lastname, phone, email } = req.body;
   try {
-<<<<<<<<< Temporary merge branch 1
     console.log(email)
     const user = await pool.query(`SELECT email FROM profile where email = '${email}'`);
     console.log(user.rows);
@@ -16,12 +15,6 @@ const createProfile = async (req, res) => {
     } else {
           return res.send('there is already a user with this email');
         } 
-=========
-    await pool.query(
-      `INSERT INTO profile(id_profile, name, lastname, phone, email, client) VALUES (${id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
-    );
-    res.sendStatus(201);
->>>>>>>>> Temporary merge branch 2
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
