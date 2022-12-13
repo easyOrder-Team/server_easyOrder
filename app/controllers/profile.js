@@ -1,13 +1,14 @@
 const pool = require("../../config/bd");
 
 const createProfile = async (req, res) => {
-  const { id_profile, name, lastname, phone, email } = req.body;
+  const { id_profile, name, lastname, phone, email,picture } = req.body;
+  
   try {
 
     await pool.query(
-      `INSERT INTO profile(id_profile, name, lastname, phone, email, client) VALUES (${id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
+      `INSERT INTO profile(id_profile, name, lastname, phone, email, picture,client) VALUES ('${id_profile}','${name}', '${lastname}', '${phone}','${email}','${picture}',true );`
     );
-    res.sendStatus(201);
+    res.status(201).json('Created');
 
   } catch (error) {
     res.status(404).json({ error: error.message });
