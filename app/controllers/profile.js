@@ -1,16 +1,27 @@
-const pool = require('../../config/bd');
+const pool = require("../../config/bd");
 
 const createProfile = async (req, res) => {
-  const { Id_profile, name, lastname, phone, email } = req.body;
+  const { id_profile, name, lastname, phone, email, picture } = req.body;
+
   try {
     await pool.query(
-      `INSERT INTO profile(Id_profile, name, lastname, phone, email, client) VALUES (${Id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
+      `INSERT INTO profile(id_profile, name, lastname, phone, email, picture,client) VALUES ('${id_profile}','${name}', '${lastname}', '${phone}','${email}','${picture}',true );`
     );
-    res.sendStatus(201);
+    res.status(201).json("Created");
+
+    if (user.rowCount === 0) {
+      await pool.query(
+        `INSERT INTO profile(Id_profile, name, lastname, phone, email, client) VALUES (${Id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
+      );
+      return res.sendStatus(201);
+    } else {
+      return res.send("there is already a user with this email");
+    }
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
 };
+
 const updateProfile = async (req, res) => {
   try {
     const { id } = req.params;
@@ -23,9 +34,9 @@ const updateProfile = async (req, res) => {
         `UPDATE profile SET ${key} = '${value}' WHERE id_profile = ${id}`
       );
       if (data.rowCount.length < 0)
-        throw new Error('You must enter valid information');
+        throw new Error("You must enter valid information");
     }
-    return res.json('The profile was successfully updated');
+    return res.json("The profile was successfully updated");
   } catch (error) {
     res.json(error.message);
   }
@@ -47,7 +58,7 @@ const becomeAdmin = async (req, res) => {
     }
 
     if (data.rowCount.length < 0)
-      throw new Error('This profile does not exist');
+      throw new Error("This profile does not exist");
     return res.json(okMessage);
   } catch (error) {
     res.json(error.message);
@@ -56,8 +67,15 @@ const becomeAdmin = async (req, res) => {
 
 const getAllProfile = async (req, res) => {
   try {
-    let allProfile = await pool.query('SELECT * FROM profile WHERE state = true');
-    res.json(allProfile.rows);
+    let allProfile = await pool.query(
+      "SELECT * FROM profile WHERE state = true"
+    );
+
+    if (allProfile.rows.length <= 0) {
+      return res.json(`There are no available Profiles yet.`);
+    } else {
+      res.json(allProfile.rows);
+    }
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -67,9 +85,14 @@ const getProfile = async (req, res) => {
   try {
     const { id } = req.params;
     let allProfile = await pool.query(
-      `SELECT * FROM profile WHERE Id_profile = '${id}'`
+      `SELECT * FROM profile WHERE Id_profile = '${id}' and state = true`
     );
-    res.json(allProfile.rows[0]);
+
+    if (allProfile.rows.length <= 0) {
+      res.json("There is no active User for that ID");
+    } else {
+      res.json(allProfile.rows[0]);
+    }
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -81,7 +104,7 @@ const deleteUser = async (req, res) => {
     const dbData = await pool.query(
       `UPDATE profile SET state = false WHERE id_profile = ${id}`
     );
-    return res.send('User Deleted');
+    return res.send(`The User with the ID ${id} has been removed.`);
   } catch (error) {
     res.json(error.message);
   }
@@ -93,19 +116,24 @@ const activeUser = async (req, res) => {
     await pool.query(
       `UPDATE profile SET state = true WHERE id_profile = ${id}`
     );
-    return res.send('User Actived');
+    return res.send(`The User with the ID ${id} is now active.`);
   } catch (error) {
     res.json(error.message);
   }
 };
 
-const getDisablesUser = async (req, res) => {
+const getDisabledUser = async (req, res) => {
   try {
     const dbData = await pool.query(
-      `select profile.id_profile, profile.name, profile.lastname, profile.email, profile.phone, profile.state from profile
-            where profile.state = false`
+      `SELECT profile.id_profile, profile.name, profile.lastname, profile.email, profile.phone, profile.state FROM profile
+            WHERE profile.state = false`
     );
-    return res.json(dbData.rows);
+
+    if (dbData.rows.length <= 0) {
+      res.json("There is no disabled Users yet.");
+    } else {
+      return res.json(dbData.rows);
+    }
   } catch (error) {
     res.json(error.message);
   }
@@ -118,6 +146,6 @@ module.exports = {
   getAllProfile,
   getProfile,
   deleteUser,
-  getDisablesUser,
-  activeUser
+  getDisabledUser,
+  activeUser,
 };
