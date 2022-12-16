@@ -1,4 +1,4 @@
-const pool = require('../../config/bd');
+const pool = require("../../config/bd");
 
 const createReservation = async (req, res) => {
   const { Amount_Persons, date, hour, id_profile } = req.body;
@@ -10,9 +10,9 @@ const createReservation = async (req, res) => {
       await pool.query(
         `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
       );
-      return res.send('reservation made successfully');
+      return res.send("reservation made successfully");
     } else {
-      res.send('you already have a reservation with these details');
+      res.send("you already have a reservation with these details");
     }
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -52,29 +52,14 @@ const getAllReservation = async (req, res)=>{
         const { id } = req.params;
         let reservations
         if(id){
-            reservations = await pool.query(`SELECT * FROM reservation WHERE id_profile = ${id} and state = true`)
+            reservations = await pool.query(`SELECT * FROM reservation WHERE id_reservation = ${id}`)
         }else{
-            reservations = await pool.query(`SELECT * FROM reservation WHERE state = true`)
+            reservations = await pool.query(`SELECT * FROM reservation`)
         }
-        if (reservations.rowCount !== 0){
         res.json(reservations.rows)
-        }else{
-          res.send("There is no active reservation")
-        }
     } catch (error) {
         res.json({ message: error.message });
     }
-}
-
-const activeReservation = async (req, res)=>{
-  try {
-    const { id } = req.params
-    const reservation = pool.query(`UPDATE reservation SET state = true WHERE id_reservation = ${id}`)
-    res.json(reservation)
-    
-  } catch (error) {
-    res.json({ message: error.message });    
-  }
 }
 
 module.exports = {
