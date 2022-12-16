@@ -68,7 +68,6 @@ const becomeAdmin = async (req, res) => {
 const getAllProfile = async (req, res) => {
   try {
     let allProfile = await pool.query(
-
       "SELECT * FROM profile WHERE state = true"
     );
 
@@ -76,8 +75,8 @@ const getAllProfile = async (req, res) => {
       return res.json(`There are no available Profiles yet.`);
     } else {
       res.json(allProfile.rows);
-  }
- } catch (error) {
+    }
+  } catch (error) {
     res.status(404).json({ error: error.message });
   }
 };
@@ -94,8 +93,6 @@ const getProfile = async (req, res) => {
     } else {
       res.json(allProfile.rows[0]);
     }
-
-  
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
