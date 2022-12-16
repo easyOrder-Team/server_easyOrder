@@ -12,7 +12,7 @@ const createSite = async (req, res) => {
   }
 };
 
-const getSite = async (req, res) => {
+const getAllSite = async (req, res) => {
   try {
     let site = await pool.query(`SELECT * FROM site`);
     res.json(site.rows);
@@ -23,5 +23,5 @@ const getSite = async (req, res) => {
 
 module.exports = {
   createSite,
-  getSite,
+  getAllSite,
 };

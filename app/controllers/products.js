@@ -29,6 +29,7 @@ const orderProduct = (dbData) => {
   return notRepeat;
 };
 
+
 function firstCapital(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }

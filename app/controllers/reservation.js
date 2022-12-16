@@ -4,11 +4,11 @@ const createReservation = async (req, res) => {
   const { Amount_Persons, date, hour, id_profile } = req.body;
   try {
     const reservation = await pool.query(
-      `SELECT * FROM reservation WHERE id_profile = ${id_profile} and date = '${date}'`
+      `SELECT * FROM reservation WHERE id_profile = '${id_profile}' and date = '${date}'`
     );
     if (reservation.rowCount === 0) {
       await pool.query(
-        `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', ${id_profile})`
+        `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
       );
       return res.send('reservation made successfully');
     } else {

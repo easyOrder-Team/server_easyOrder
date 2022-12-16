@@ -4,18 +4,17 @@ const createProfile = async (req, res) => {
   const { id_profile, name, lastname, phone, email, picture } = req.body;
 
   try {
-    await pool.query(
-      `INSERT INTO profile(id_profile, name, lastname, phone, email, picture,client) VALUES ('${id_profile}','${name}', '${lastname}', '${phone}','${email}','${picture}',true );`
+    let user = await pool.query(
+      `SELECT * FROM profile where email = '${email}'`
     );
-    res.status(201).json("Created");
 
     if (user.rowCount === 0) {
       await pool.query(
-        `INSERT INTO profile(Id_profile, name, lastname, phone, email, client) VALUES (${id_profile},'${name}', '${lastname}', '${phone}','${email}', true );`
+        `INSERT INTO profile(Id_profile, name, lastname, phone, email, picture) VALUES (${id_profile},'${name}', '${lastname}', '${phone}','${email}', '${picture}' );`
       );
       return res.sendStatus(201);
     } else {
-      return res.send("there is already a user with this email");
+      return res.json({msj: "there is already a user with this email"});
     }
   } catch (error) {
     res.status(404).json({ error: error.message });
