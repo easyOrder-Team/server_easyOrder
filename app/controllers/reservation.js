@@ -62,6 +62,19 @@ const getAllReservation = async (req, res)=>{
     }
 }
 
+const activeReservation = async (req, res)=>{
+  try {
+    const { id } = req.params
+    const reservation = pool.query(`UPDATE reservation SET state = true WHERE id_reservation = ${id}`)
+    res.json(reservation)
+
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+}
+
+
+
 module.exports = {
   createReservation,
   deleteReservation,
