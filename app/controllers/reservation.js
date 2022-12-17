@@ -1,4 +1,4 @@
-const pool = require('../../config/bd');
+const pool = require("../../config/bd");
 
 const orderReservation = (dbData) => {
   allData = dbData.rows.map((r) => {
@@ -43,6 +43,7 @@ const createReservation = async (req, res) => {
       await pool.query(
         `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
       );
+<<<<<<< HEAD
       let idReservation = await pool.query("SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);")
       idReservation = idReservation.rows[0].id_reservation
       console.log(idReservation)
@@ -56,8 +57,11 @@ const createReservation = async (req, res) => {
         }
       }
       return res.send('reservation made successfully');
+=======
+      return res.send("reservation made successfully");
+>>>>>>> c2ef8d2341c40541a24882cab9dc130144a74890
     } else {
-      res.send('you already have a reservation with these details');
+      res.send("you already have a reservation with these details");
     }
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -98,19 +102,27 @@ const getAllReservation = async (req, res)=>{
       console.log(id)
         let reservations
         if(id){
+<<<<<<< HEAD
             reservations = await pool.query(`SELECT * FROM reservation 
             INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
             INNER JOIN site ON site.id_site = reservation_site.id_site WHERE reservation.id_profile = '${id}' and state = true
             `)
+=======
+            reservations = await pool.query(`SELECT * FROM reservation WHERE id_reservation = ${id}`)
+>>>>>>> c2ef8d2341c40541a24882cab9dc130144a74890
         }else{
-            reservations = await pool.query(`SELECT * FROM reservation WHERE state = true`)
+            reservations = await pool.query(`SELECT * FROM reservation`)
         }
+<<<<<<< HEAD
         if (reservations.rowCount !== 0){
           allData = orderReservation(reservations)
         res.json(allData)
         }else{
           res.send("There is no active reservation")
         }
+=======
+        res.json(reservations.rows)
+>>>>>>> c2ef8d2341c40541a24882cab9dc130144a74890
     } catch (error) {
         res.json({ message: error.message });
     }
@@ -121,11 +133,13 @@ const activeReservation = async (req, res)=>{
     const { id } = req.params
     const reservation = pool.query(`UPDATE reservation SET state = true WHERE id_reservation = ${id}`)
     res.json(reservation)
-    
+
   } catch (error) {
-    res.json({ message: error.message });    
+    res.json({ message: error.message });
   }
 }
+
+
 
 module.exports = {
   createReservation,
