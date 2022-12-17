@@ -29,7 +29,8 @@ const pool = require("../../config/bd");
 
 const createOrder = async (req, res) => {
     try {
-      const {id_mesa, id_profile,total, products} = req.body;  
+      const {id_mesa, id_profile, total, products} = req.body;  
+      console.log(id_mesa, id_profile, total, products)
       await pool.query(`INSERT INTO orders (avalible, id_mesa, id_profile) VALUES (true, ${id_mesa}, '${id_profile}')`)
       let idOrder = await pool.query(`SELECT * FROM orders WHERE id_orders = (SELECT MAX(id_orders) FROM orders);`)
       idOrder = idOrder.rows[0].id_orders

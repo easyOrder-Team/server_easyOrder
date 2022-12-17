@@ -43,10 +43,8 @@ const createReservation = async (req, res) => {
       await pool.query(
         `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
       );
-<<<<<<< HEAD
       let idReservation = await pool.query("SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);")
       idReservation = idReservation.rows[0].id_reservation
-      console.log(idReservation)
       for (let i = 0; i < allSite.length; i++) {
         for (let j = 0; j < num_table.length; j++) {
           if (allSite[i].num_table === num_table[j]) {
@@ -57,9 +55,6 @@ const createReservation = async (req, res) => {
         }
       }
       return res.send('reservation made successfully');
-=======
-      return res.send("reservation made successfully");
->>>>>>> c2ef8d2341c40541a24882cab9dc130144a74890
     } else {
       res.send("you already have a reservation with these details");
     }
@@ -99,30 +94,24 @@ const getAllReservation = async (req, res)=>{
     try {
       const { id } = req.params
       let allData = []
-      console.log(id)
         let reservations
         if(id){
-<<<<<<< HEAD
             reservations = await pool.query(`SELECT * FROM reservation 
             INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
             INNER JOIN site ON site.id_site = reservation_site.id_site WHERE reservation.id_profile = '${id}' and state = true
             `)
-=======
-            reservations = await pool.query(`SELECT * FROM reservation WHERE id_reservation = ${id}`)
->>>>>>> c2ef8d2341c40541a24882cab9dc130144a74890
         }else{
-            reservations = await pool.query(`SELECT * FROM reservation`)
+            reservations = await pool.query(`SELECT * FROM reservation
+            INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
+            INNER JOIN site ON site.id_site = reservation_site.id_site WHERE state = true
+            `)
         }
-<<<<<<< HEAD
         if (reservations.rowCount !== 0){
           allData = orderReservation(reservations)
         res.json(allData)
         }else{
           res.send("There is no active reservation")
         }
-=======
-        res.json(reservations.rows)
->>>>>>> c2ef8d2341c40541a24882cab9dc130144a74890
     } catch (error) {
         res.json({ message: error.message });
     }
