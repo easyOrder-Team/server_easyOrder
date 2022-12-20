@@ -71,15 +71,11 @@ const updateSite = async (req, res) => {
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let value = values[i];
-      const data = await pool.query(
+      await pool.query(
         `UPDATE site SET ${key} = ${value} WHERE id_site = ${id}`
       );
-      console.log(data);
-      if (data.rowCount === 0) {
-        return res.json({ message: `You must enter valid information` });
-      }
-      return res.json(data);
     }
+    return res.sendStatus(200);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }

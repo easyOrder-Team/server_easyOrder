@@ -36,10 +36,9 @@ const createOrder = async (req, res) => {
       for (let i = 0; i < products.length; i++) {
         await pool.query(`INSERT INTO product_order (id_product, id_order, amount_product, total_price) VALUES (${products[i].id}, ${idOrder}, ${products[i].amount}, ${total});`)
       }
-      
-        res.sendStatus(201)
+      res.sendStatus(201)
     } catch (error) {
-        res.json({error: error.message})
+      res.json({error: error.message})
     }
 }
 
@@ -51,9 +50,27 @@ const getAllOrders = async (req, res) => {
       orders = orderOrders(orders)
        res.json(orders)
     } catch (error) {
-        res.json({error: error.message}) 
+      res.json({error: error.message}) 
     }
 }
 
+const getOrder = async (req,res) => {
+  try {
+    const {id} = req.params;
 
-module.exports = {createOrder, getAllOrders}
+    let order = await pool.query(`SELECT * FROM orders 
+    INNER JOIN product_order ON product_order.id_order = orders.id_orders
+    INNER JOIN products ON products.id_products = product_order.id_product WHERE orders.id_orders = ${id}`)
+
+    order = orderOrders(order)
+    res.json(order)
+  } catch (error) {
+    res.json({error: error.message}) 
+  }
+}
+
+module.exports = {
+  createOrder, 
+  getAllOrders, 
+  getOrder
+}
