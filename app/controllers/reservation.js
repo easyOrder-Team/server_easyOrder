@@ -11,7 +11,7 @@ const orderReservation = (dbData) => {
       id_profile: r.id_profile,
       id_site: r.id_site,
       avalible: r.avalible,
-      num_table: [{num_table: r.num_table }],
+      num_table: [r.num_table],
     };
   });
   let notRepeat = [];
@@ -35,15 +35,31 @@ const createReservation = async (req, res) => {
   try {
     let allSite = await pool.query(`SELECT * FROM site`)
     allSite = allSite.rows
- 
-    const reservation = await pool.query(
-      `SELECT * FROM reservation WHERE id_profile = '${id_profile}' and date = '${date}'`
+    
+    let reservation = await pool.query(
+      // `SELECT * FROM reservation WHERE id_profile = '${id_profile}' and date = '${date}'`
+      `SELECT * FROM reservation 
+      INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
+      INNER JOIN site ON site.id_site = reservation_site.id_site WHERE reservation.date = '${date}' and reservation.hour = '${hour}'
+      `
     );
-    if (reservation.rowCount === 0) {
+     reservation = orderReservation(reservation)
+      if(reservation){
+      reservation.map((n)=>{
+        for (let i = 0; i < n.num_table.length; i++) {
+          for (let j = 0; j < num_table.length; j++) {
+            if (n.num_table[i] === num_table[j]){
+            return res.send('esta mesa ya esta reservada')
+            }
+          }
+          
+        }
+      })
+    }else{
       await pool.query(
         `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
       );
-      let idReservation = await pool.query("SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);")
+            let idReservation = await pool.query("SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);")
       idReservation = idReservation.rows[0].id_reservation
       for (let i = 0; i < allSite.length; i++) {
         for (let j = 0; j < num_table.length; j++) {
@@ -55,13 +71,26 @@ const createReservation = async (req, res) => {
         }
       }
       return res.send('reservation made successfully');
-    } else {
-      res.send("you already have a reservation with these details");
     }
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
-};
+  };
+    // if (reservation.rowCount === 0) {
+    //   await pool.query(
+    //     `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
+    //   );
+    //   let idReservation = await pool.query("SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);")
+    //   idReservation = idReservation.rows[0].id_reservation
+    //   for (let i = 0; i < allSite.length; i++) {
+    //     for (let j = 0; j < num_table.length; j++) {
+    //       if (allSite[i].num_table === num_table[j]) {
+    //         await pool.query(
+    //           `INSERT INTO reservation_site (id_reservation, id_site) VALUES('${idReservation}','${allSite[i].id_site}' )`
+    //         );
+    //       }
+    //     }
+    //   }
 
 const deleteReservation = async (req, res) => {
   try {
