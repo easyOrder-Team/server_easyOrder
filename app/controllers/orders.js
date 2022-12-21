@@ -30,14 +30,15 @@ const pool = require("../../config/bd");
 const createOrder = async (req, res) => {
     try {
       const {id_mesa, id_profile, total, products} = req.body;  
-      console.log(id_mesa, id_profile, total, products)
+      
       await pool.query(`INSERT INTO orders (avalible, id_mesa, id_profile) VALUES (true, ${id_mesa}, '${id_profile}')`)
       let idOrder = await pool.query(`SELECT * FROM orders WHERE id_orders = (SELECT MAX(id_orders) FROM orders);`)
       idOrder = idOrder.rows[0].id_orders
       for (let i = 0; i < products.length; i++) {
-        await pool.query(`INSERT INTO product_order (id_product, id_order, amount_product, total_price) VALUES (${products[i].id}, ${idOrder}, ${products[i].amount}, ${total});`)
+        await pool.query(`INSERT INTO product_order (id_product, id_order, amount_product, total_price) VALUES (${products[i].id}, ${idOrder}, ${products[i].count}, ${total});`)
       }
-      res.sendStatus(201)
+      let order = await pool.query(`SELECT * FROM orders WHERE id_orders = ${idOrder}`)
+      res.json(order.rows[0])
     } catch (error) {
       res.json({error: error.message})
     }

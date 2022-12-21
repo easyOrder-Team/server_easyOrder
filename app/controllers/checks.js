@@ -56,11 +56,11 @@ const getChecks = async (req, res) => {
 const createCheck = async (req, res)=>{
   try {
     const { id_check, name, lastName, date, total, email, id_order } = req.body;
-     await pool.query(`INSERT INTO payments (id_check, name, lastname, date, total, email, id_order) VALUES (${id_check}, '${name}', '${lastName}', '${date}', ${total}, '${email}', ${id_order})`)
-     res.send('created')
+    await pool.query(`INSERT INTO payments (id_check, name, lastname, date, total, email, id_order) VALUES ('${id_check}', '${name}', '${lastName}', '${date}', ${total}, '${email}', ${id_order})`)
+    res.send('created')
   } catch (error) {
     res.json({ message: error.message });
-      }
+  }
 }
 
 module.exports = {
