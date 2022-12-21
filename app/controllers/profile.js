@@ -10,7 +10,7 @@ const createProfile = async (req, res) => {
 
     if (user.rowCount === 0) {
       await pool.query(
-        `INSERT INTO profile(Id_profile, name, lastname, phone, email, picture) VALUES (${id_profile},'${name}', '${lastname}', '${phone}','${email}', '${picture}' );`
+        `INSERT INTO profile(Id_profile, name, lastname, phone, email, picture) VALUES ('${id_profile}','${name}', '${lastname}', '${phone}','${email}', '${picture}' );`
       );
       return res.sendStatus(201);
     } else {
