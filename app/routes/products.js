@@ -26,10 +26,7 @@ router.get("/:id", getProductById);
 router.post("/", createProduct);
 router.get("/", getProducts);
 router.get("/filter/priceOrder", priceOrder);
-<<<<<<< HEAD
 router.get("/filter/timePreparationOrder", timePreparationOrder);
-=======
->>>>>>> dev
 router.put("/:id", ActiveProduct);
 
 module.exports = router;
