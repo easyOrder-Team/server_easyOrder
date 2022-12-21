@@ -8,6 +8,7 @@ const {
   getNumTable,
   getSiteAvalible,
   updateSite,
+  activeSite,
 } = require("../controllers/site");
 const { route } = require("./products");
 
@@ -17,5 +18,6 @@ router.delete("/:id", deleteSite);
 router.get("/avalible", getSiteAvalible);
 router.get("/:id", getNumTable);
 router.put("/update/:id", updateSite);
+router.put("/active", activeSite);
 
 module.exports = router;
