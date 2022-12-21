@@ -19,13 +19,17 @@ router.get("/categories", getCategories);
 router.get("/disabled", getDisabledProducts);
 router.post("/category", createCategory);
 router.get("/filter/filterByCategory", filterByCategory);
+router.get("/filter/timePreparationOrder", timePreparationOrder);
 router.put("/update/:id", updateProduct);
 router.delete("/:id", deleteProduct);
 router.get("/:id", getProductById);
 router.post("/", createProduct);
 router.get("/", getProducts);
 router.get("/filter/priceOrder", priceOrder);
+<<<<<<< HEAD
 router.get("/filter/timePreparationOrder", timePreparationOrder);
+=======
+>>>>>>> dev
 router.put("/:id", ActiveProduct);
 
 module.exports = router;
