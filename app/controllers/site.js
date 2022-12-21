@@ -72,6 +72,7 @@ const updateSite = async (req, res) => {
       let key = keys[i];
       let value = values[i];
       await pool.query(
+      await pool.query(
         `UPDATE site SET ${key} = ${value} WHERE id_site = ${id}`
       );
     }
@@ -81,10 +82,6 @@ const updateSite = async (req, res) => {
   }
 };
 
-/* const disableSite = async (req, res){
-
-} */
-
 module.exports = {
   createSite,
   getAllSite,
@@ -92,4 +89,5 @@ module.exports = {
   getNumTable,
   getSiteAvalible,
   updateSite,
+  activeSite,
 };
