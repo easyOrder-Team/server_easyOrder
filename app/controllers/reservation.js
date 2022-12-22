@@ -31,7 +31,7 @@ const orderReservation = (dbData) => {
 };
 
 const createReservation = async (req, res) => {
-  const { Amount_Persons, date, hour, id_profile, num_table } = req.body;
+  const { amount_Persons, date, hour, id_profile, num_table } = req.body;
   try {
     let allSite = await pool.query(`SELECT * FROM site`);
     allSite = allSite.rows;
@@ -41,7 +41,7 @@ const createReservation = async (req, res) => {
     );
     if (reservation.rowCount === 0) {
       await pool.query(
-        `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
+        `INSERT INTO reservation( amount_Persons, Date, Hour, id_Profile) VALUES ( ${amount_Persons}, '${date}', '${hour}', '${id_profile}')`
       );
       let idReservation = await pool.query(
         "SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);"
