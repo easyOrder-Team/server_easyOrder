@@ -71,23 +71,33 @@ const updateSite = async (req, res) => {
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let value = values[i];
-      const data = await pool.query(
+      await pool.query(
         `UPDATE site SET ${key} = ${value} WHERE id_site = ${id}`
       );
-      console.log(data);
-      if (data.rowCount === 0) {
-        return res.json({ message: `You must enter valid information` });
-      }
-      return res.json(data);
     }
+    return res.json({ message: "The site has been updated" });
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
 };
 
-/* const disableSite = async (req, res){
-
-} */
+const activeSite = async (req, res) => {
+  const { num_table, avalible } = req.body;
+  try {
+    if (avalible === true) {
+      await pool.query(
+        `UPDATE site SET avalible = false WHERE num_table = ${num_table} `
+      );
+      return res.json({ message: "Table available " });
+    }
+    await pool.query(
+      `UPDATE site SET avalible = true WHERE num_table = ${num_table}`
+    );
+    return res.json({ message: "Table not available " });
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+};
 
 module.exports = {
   createSite,
@@ -96,4 +106,5 @@ module.exports = {
   getNumTable,
   getSiteAvalible,
   updateSite,
+  activeSite,
 };
