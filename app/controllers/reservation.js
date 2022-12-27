@@ -113,24 +113,11 @@ const getAllReservation = async (req, res) => {
       );
       if (reservations.rows.length <= 0) {
         return res.json(reservations);
-        //return res.json("There are no active reservations");
       } else {
         allData = orderReservation(reservations);
         return res.json(allData);
       }
     }
-
-    // reservations = await pool.query(`SELECT * FROM reservation
-    //       INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
-    //       INNER JOIN site ON site.id_site = reservation_site.id_site WHERE state = true
-    //       `);
-    // }
-    // if (reservations.rowCount !== 0) {
-    //   allData = orderReservation(reservations);
-    //   res.json(allData);
-    // } else {
-    //   res.send("There is no active reservation");
-    // }
   } catch (error) {
     res.json({ message: error.message });
   }
