@@ -68,7 +68,7 @@ const getAllOrders = async (req, res) => {
 const changeStateOrder = async (req, res)=>{
   try {
     const { id } = req.params;
-    const { cancel } = req.query
+    const { cancel, processing, finished } = req.query
     let state = await pool.query(`SELECT state FROM orders WHERE id_orders = ${id}`);
     state = state.rows[0].state
     if (cancel === "cancel"){
@@ -77,19 +77,19 @@ const changeStateOrder = async (req, res)=>{
       );
       return res.send('cancel')
     }
-    if (state === 'created'){
+    if (processing === 'processing'){
       pool.query(
         `UPDATE orders SET state = 'processing' WHERE id_orders = ${id}`
       );
       return res.send('processing')
     }
-    if (state === 'processing'){
+    if (finished === 'finished'){
       pool.query(
         `UPDATE orders SET state = 'finished' WHERE id_orders = ${id}`
       );
       return res.send('finished')
     }
-    res.send(state);
+    res.send(`the state is ${state}`);
   } catch (error) {
     res.json({ message: error.message });
   }
