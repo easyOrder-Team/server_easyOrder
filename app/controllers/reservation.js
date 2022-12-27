@@ -29,32 +29,34 @@ const orderReservation = (dbData) => {
   }
   return notRepeat;
 };
-const createReservation = async (req, res) => {
-  const { amount_persons, date, hour, id_profile, num_table } = req.body;
-  try {
-    let allSite = await pool.query(`SELECT * FROM site`);
-    allSite = allSite.rows;
 
+const createReservation = async (req, res) => {
+  try {
+    const { amount_persons, date, hour, id_profile, num_table } = req.body;
     const reservation = await pool.query(
       `SELECT * FROM reservation WHERE id_profile = '${id_profile}' and date = '${date}'`
     );
     if (reservation.rowCount === 0) {
+      let allSite = await pool.query(`SELECT * FROM site`);
+      allSite = allSite.rows;
       await pool.query(
-        `INSERT INTO reservation( amount_persons, date, hour, id_Profile) VALUES ( ${amount_persons}, '${date}', '${hour}', '${id_profile}')`
+        `INSERT INTO reservation( amount_persons, date, hour, id_profile) VALUES ( ${amount_persons}, '${date}', '${hour}', '${id_profile}')`
       );
-      let idReservation = await pool.query(
-        "SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);"
+      let lastReservation = await pool.query(
+        "SELECT * FROM reservation WHERE id_reservation = (SELECT MAX(id_reservation) FROM reservation);"
       );
-      idReservation = idReservation.rows[0].id_reservation;
+      lastReservation = lastReservation.rows[0].id_reservation;
+
       for (let i = 0; i < allSite.length; i++) {
         for (let j = 0; j < num_table.length; j++) {
-          if (allSite[i].num_table === num_table[j]) {
+          if (allSite[i].id_site === num_table[j]) {
             await pool.query(
-              `INSERT INTO reservation_site (id_reservation, id_site) VALUES('${idReservation}','${allSite[i].id_site}' )`
+              `INSERT INTO reservation_site (id_site, id_reservation) VALUES('${lastReservation}','${allSite[i].id_site}' )`
             );
           }
         }
       }
+
       return res.send("reservation made successfully");
     } else {
       res.send("you already have a reservation with these details");
@@ -64,6 +66,53 @@ const createReservation = async (req, res) => {
   }
 };
 
+// const createReservation = async (req, res) => {
+//   const { amount_persons, date, hour, id_profile, num_table } = req.body;
+//   try {
+//     let allSite = await pool.query(`SELECT * FROM site`);
+//     allSite = allSite.rows;
+
+//     let reservation = await pool.query(
+//       // SELECT * FROM reservation WHERE id_profile = '${id_profile}' and date = '${date}'
+//       `SELECT * FROM reservation
+//       INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
+//       INNER JOIN site ON site.id_site = reservation_site.id_site WHERE reservation.date = '${date}' and reservation.hour = '${hour}'`
+//     );
+//     reservation = orderReservation(reservation);
+//     console.log(reservation);
+//     if (reservation.length !== 0) {
+//       reservation.map(async (n) => {
+//         // for (let i = 0; i < n.num_table.length; i++) {
+//         for (let j = 0; j < num_table.length; j++) {
+//           if (!n.num_table.includes(num_table[j])) {
+//             await pool.query(
+//               `INSERT INTO reservation( amount_persons, Date, Hour, id_Profile) VALUES ( ${amount_persons}, '${date}', '${hour}', '${id_profile}')`
+//             );
+//             let idReservation = await pool.query(
+//               "SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);"
+//             );
+//             idReservation = idReservation.rows[0].id_reservation;
+//             for (let i = 0; i < allSite.length; i++) {
+//               for (let j = 0; j < num_table.length; j++) {
+//                 if (allSite[i].num_table === num_table[j]) {
+//                   await pool.query(
+//                     `INSERT INTO reservation_site (id_reservation, id_site) VALUES('${idReservation}','${allSite[i].id_site}' )`
+//                   );
+//                 }
+//               }
+//             }
+//             return res.send("reservation made successfully");
+//           } else {
+//             return res.send("esta mesa ya esta reservada");
+//           }
+//         }
+//         // }
+//       });
+//     }
+//   } catch (error) {
+//     res.status(404).json({ error: error.message });
+//   }
+// };
 const deleteReservation = async (req, res) => {
   try {
     const { id } = req.params;
