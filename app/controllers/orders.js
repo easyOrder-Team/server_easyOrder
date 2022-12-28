@@ -26,6 +26,31 @@ const orderOrders = (dbData) => {
   }
   return notRepeat;
 };
+const orderOrders = (dbData) => {
+  allData = dbData.rows.map((d) => {
+    return {
+      id: d.id_orders,
+      avalible: d.avalible,
+      profile: d.id_profile,
+      price: d.total_price,
+      products: [{ id: d.id_product, name: d.name, amount: d.amount_product }],
+    };
+  });
+  let notRepeat = [];
+
+  for (let i = 0; i < allData.length; i++) {
+    if (notRepeat.findIndex((p) => p.id === allData[i].id) === -1)
+      notRepeat.push(allData[i]);
+    else {
+      let index = notRepeat.findIndex((p) => p.id === allData[i].id);
+      notRepeat[index].products = [
+        ...notRepeat[index].products,
+        ...allData[i].products,
+      ];
+    }
+  }
+  return notRepeat;
+};
 
 const createOrder = async (req, res) => {
   try {

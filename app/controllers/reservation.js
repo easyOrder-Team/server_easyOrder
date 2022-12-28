@@ -11,7 +11,7 @@ const orderReservation = (dbData) => {
       id_profile: r.id_profile,
       id_site: r.id_site,
       avalible: r.avalible,
-      num_table: [r.num_table],
+      num_table: [{ num_table: r.num_table }],
     };
   });
   let notRepeat = [];
@@ -31,68 +31,36 @@ const orderReservation = (dbData) => {
 };
 
 const createReservation = async (req, res) => {
-  const { Amount_Persons, date, hour, id_profile, num_table } = req.body;
   try {
-    let allSite = await pool.query(`SELECT * FROM site`);
-    allSite = allSite.rows;
-
-    let reservation = await pool.query(
-      // SELECT * FROM reservation WHERE id_profile = '${id_profile}' and date = '${date}'
-      `SELECT * FROM reservation 
-      INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
-      INNER JOIN site ON site.id_site = reservation_site.id_site WHERE reservation.date = '${date}' and reservation.hour = '${hour}'`
+    const { amount_persons, date, hour, id_profile, num_table } = req.body;
+    const reservation = await pool.query(
+      `SELECT * FROM reservation WHERE id_profile = '${id_profile}' and date = '${date}'`
     );
-    reservation = orderReservation(reservation);
-    console.log(reservation)
-    if (reservation.length !== 0) {
-      reservation.map(async (n) => {
-        // for (let i = 0; i < n.num_table.length; i++) {
-          for (let j = 0; j < num_table.length; j++) {
-            if (!n.num_table.includes(num_table[j])) {
-              await pool.query(
-                `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
-              );
-              let idReservation = await pool.query(
-                'SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);'
-              );
-              idReservation = idReservation.rows[0].id_reservation;
-              for (let i = 0; i < allSite.length; i++) {
-                for (let j = 0; j < num_table.length; j++) {
-                  if (allSite[i].num_table === num_table[j]) {
-                    await pool.query(
-                      `INSERT INTO reservation_site (id_reservation, id_site) VALUES('${idReservation}','${allSite[i].id_site}' )`
-                    );
-                  }
-                }
-                }
-                return res.send('reservation made successfully');
-              }else {
-              return res.send('esta mesa ya esta reservada');
-             
-            }
+    if (reservation.rowCount === 0) {
+      let allSite = await pool.query(`SELECT * FROM site`);
+      allSite = allSite.rows;
+      await pool.query(
+        `INSERT INTO reservation( amount_persons, date, hour, id_profile) VALUES ( ${amount_persons}, '${date}', '${hour}', '${id_profile}')`
+      );
+      let lastReservation = await pool.query(
+        "SELECT * FROM reservation WHERE id_reservation = (SELECT MAX(id_reservation) FROM reservation);"
+      );
+      lastReservation = lastReservation.rows[0].id_reservation;
+
+      for (let i = 0; i < allSite.length; i++) {
+        for (let j = 0; j < num_table.length; j++) {
+          if (allSite[i].id_site === num_table[j]) {
+            await pool.query(
+              `INSERT INTO reservation_site (id_reservation, id_site) VALUES('${lastReservation}','${allSite[i].id_site}' )`
+            );
           }
-        // }
-      });
-    } 
-    // else {
-    //   await pool.query(
-    //     `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
-    //   );
-    //   let idReservation = await pool.query(
-    //     'SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);'
-    //   );
-    //   idReservation = idReservation.rows[0].id_reservation;
-    //   for (let i = 0; i < allSite.length; i++) {
-    //     for (let j = 0; j < num_table.length; j++) {
-    //       if (allSite[i].num_table === num_table[j]) {
-    //         await pool.query(
-    //           `INSERT INTO reservation_site (id_reservation, id_site) VALUES('${idReservation}','${allSite[i].id_site}' )`
-    //         );
-    //       }
-    //     }
-    //   }
-    //   return res.send('reservation made successfully');
-    // }
+        }
+      }
+
+      return res.send("reservation made successfully");
+    } else {
+      res.send("you already have a reservation with these details");
+    }
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -119,7 +87,7 @@ const deleteReservation = async (req, res) => {
     const reservation = await pool.query(
       `UPDATE reservation SET state = false WHERE id_reservation = ${id}`
     );
-    return res.json('The reservation has been deleted');
+    return res.json("The reservation has been deleted");
   } catch (error) {
     res.json({ message: error.message });
   }
@@ -129,13 +97,13 @@ const getAllDisablesReservation = async (req, res) => {
   try {
     const { id } = req.params;
     const reservations = await pool.query(
-      `SELECT * FROM reservation WHERE state = false and id_profile = '${id}'`
+      `SELECT * FROM reservation WHERE state = false and id_profile = ${id}`
     );
     console.log(reservations.rows);
     if (reservations.rowCount !== 0) {
       res.json(reservations.rows);
     } else {
-      res.send('No reservations found deleted');
+      res.send("No reservations found deleted");
     }
   } catch (error) {
     res.json({ message: error.message });
@@ -153,16 +121,17 @@ const getAllReservation = async (req, res) => {
             INNER JOIN site ON site.id_site = reservation_site.id_site WHERE reservation.id_profile = '${id}' and state = true
             `);
     } else {
-      reservations = await pool.query(`SELECT * FROM reservation
-            INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
-            INNER JOIN site ON site.id_site = reservation_site.id_site WHERE state = true
-            `);
-    }
-    if (reservations.rowCount !== 0) {
-      allData = orderReservation(reservations);
-      res.json(allData);
-    } else {
-      res.send('There is no active reservation');
+      reservations = await pool.query(
+        `SELECT * FROM reservation
+        INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
+        INNER JOIN site ON site.num_table = reservation_site.id_site WHERE state = true`
+      );
+      if (reservations.rows.length <= 0) {
+        return res.json(reservations);
+      } else {
+        allData = orderReservation(reservations);
+        return res.json(allData);
+      }
     }
   } catch (error) {
     res.json({ message: error.message });
