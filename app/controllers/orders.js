@@ -31,7 +31,7 @@ const createOrder = async (req, res) => {
   try {
     const {id_mesa, id_profile, total, products} = req.body;
 
-    await pool.query(`INSERT INTO orders (avalible, id_mesa, id_profile) VALUES (true, ${id_mesa}, '${id_profile}')`)
+    await pool.query(`INSERT INTO orders (avalible,  id_mesa, id_profile) VALUES (true, ${id_mesa}, '${id_profile}')`)
     let idOrder = await pool.query(`SELECT * FROM orders WHERE id_orders = (SELECT MAX(id_orders) FROM orders)`)
     idOrder = idOrder.rows[0].id_orders
     for (let i = 0; i < products.length; i++) {
@@ -95,4 +95,18 @@ const changeStateOrder = async (req, res)=>{
   }
 }
 
-module.exports = { createOrder, getAllOrders, changeStateOrder };
+const filterOrdersByState = async (req, res)=>{
+  try {
+    const {state} = req.query;
+    console.log(state)
+    let allOrders = await pool.query(`SELECT * FROM orders
+    INNER JOIN product_order ON product_order.id_order = orders.id_orders
+    INNER JOIN products ON products.id_products = product_order.id_product WHERE state = '${state}'`)
+    // allOrders = orderOrders(allOrders.rows)
+    res.json(allOrders.rows)
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+}
+
+module.exports = { createOrder, getAllOrders, changeStateOrder, filterOrdersByState };
