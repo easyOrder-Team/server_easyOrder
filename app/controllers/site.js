@@ -72,11 +72,28 @@ const updateSite = async (req, res) => {
       let key = keys[i];
       let value = values[i];
       await pool.query(
-      await pool.query(
         `UPDATE site SET ${key} = ${value} WHERE id_site = ${id}`
       );
     }
-    return res.sendStatus(200);
+    return res.json({ message: "The site has been updated" });
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+};
+
+const activeSite = async (req, res) => {
+  const { num_table, avalible } = req.body;
+  try {
+    if (avalible === true) {
+      await pool.query(
+        `UPDATE site SET avalible = false WHERE num_table = ${num_table} `
+      );
+      return res.json({ message: "Table available " });
+    }
+    await pool.query(
+      `UPDATE site SET avalible = true WHERE num_table = ${num_table}`
+    );
+    return res.json({ message: "Table not available " });
   } catch (error) {
     res.status(404).json({ error: error.message });
   }

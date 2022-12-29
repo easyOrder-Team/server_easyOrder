@@ -37,7 +37,7 @@ const createOrder = async (req, res) => {
       for (let i = 0; i < products.length; i++) {
         await pool.query(`INSERT INTO product_order (id_product, id_order, amount_product, total_price) VALUES (${products[i].id}, ${idOrder}, ${products[i].count}, ${total});`)
       }
-      let order = await pool.query(`SELECT * FROM orders WHERE id_orders = ${idOrder}`)
+      // let order = await pool.query(`SELECT * FROM orders WHERE id_orders = ${idOrder}`)
       res.json(order.rows[0])
     } catch (error) {
       res.json({error: error.message})
