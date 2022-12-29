@@ -26,31 +26,6 @@ const orderOrders = (dbData) => {
   }
   return notRepeat;
 };
-const orderOrders = (dbData) => {
-  allData = dbData.rows.map((d) => {
-    return {
-      id: d.id_orders,
-      avalible: d.avalible,
-      profile: d.id_profile,
-      price: d.total_price,
-      products: [{ id: d.id_product, name: d.name, amount: d.amount_product }],
-    };
-  });
-  let notRepeat = [];
-
-  for (let i = 0; i < allData.length; i++) {
-    if (notRepeat.findIndex((p) => p.id === allData[i].id) === -1)
-      notRepeat.push(allData[i]);
-    else {
-      let index = notRepeat.findIndex((p) => p.id === allData[i].id);
-      notRepeat[index].products = [
-        ...notRepeat[index].products,
-        ...allData[i].products,
-      ];
-    }
-  }
-  return notRepeat;
-};
 
 const createOrder = async (req, res) => {
   try {
@@ -76,12 +51,14 @@ const getAllOrders = async (req, res) => {
     if (!id){
       orders = await pool.query(`SELECT * FROM orders
         INNER JOIN product_order ON product_order.id_order = orders.id_orders
-        INNER JOIN products ON products.id_products = product_order.id_product`);
+        INNER JOIN products ON products.id_products = product_order.id_product
+        INNER JOIN payments ON payments.id_order = orders.id_orders`);
       orders = orderOrders(orders);
     }else{
       orders = await pool.query(`SELECT * FROM orders
         INNER JOIN product_order ON product_order.id_order = orders.id_orders
-        INNER JOIN products ON products.id_products = product_order.id_product WHERE id_profile = '${id}'`);
+        INNER JOIN products ON products.id_products = product_order.id_product
+        INNER JOIN payments ON payments.id_order = orders.id_orders WHERE id_profile = '${id}'`);
       orders = orderOrders(orders);
     }
     return res.json(orders);
@@ -123,11 +100,9 @@ const changeStateOrder = async (req, res)=>{
 const filterOrdersByState = async (req, res)=>{
   try {
     const {state} = req.query;
-    console.log(state)
     let allOrders = await pool.query(`SELECT * FROM orders
     INNER JOIN product_order ON product_order.id_order = orders.id_orders
     INNER JOIN products ON products.id_products = product_order.id_product WHERE state = '${state}'`)
-    // allOrders = orderOrders(allOrders.rows)
     res.json(allOrders.rows)
   } catch (error) {
     res.json({ message: error.message });
