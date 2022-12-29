@@ -29,6 +29,7 @@ const orderProduct = (dbData) => {
   return notRepeat;
 };
 
+
 function firstCapital(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
@@ -155,7 +156,6 @@ const createCategory = async (req, res) => {
   let { name } = req.body;
 
   try {
-
     name = firstCapital(name);
     pool.query(`INSERT INTO category(name_c) VALUES ('${name}')`);
     res.sendStatus(201);
@@ -220,7 +220,6 @@ const updateProduct = async (req, res) => {
   }
 };
 
-
 const filterByCategory = async (req, res) => {
   let { category } = req.query;
   try {
@@ -257,11 +256,12 @@ const timePreparationOrder = async (req, res) => {
 
 const priceOrder = async (req, res) => {
   try {
+    const { higher, minor} = req.body
     let allData;
     const allprice = await pool.query(
-      `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
+      `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products 
         INNER JOIN products_category ON products_category.id_product = products.id_products
-        INNER JOIN category on category.id_category = products_category.id_categorie ORDER BY products.price ASC`
+        INNER JOIN category on category.id_category = products_category.id_categorie WHERE products.price <= ${higher} and products.price >= ${minor}ORDER BY products.price ASC`  
     );
     allData = orderProduct(allprice);
     res.json(allData);
