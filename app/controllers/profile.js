@@ -14,7 +14,7 @@ const createProfile = async (req, res) => {
       );
       return res.sendStatus(201);
     } else {
-      return res.json({msj: "there is already a user with this email"});
+      return res.json({ msj: "there is already a user with this email" });
     }
   } catch (error) {
     res.status(404).json({ error: error.message });
