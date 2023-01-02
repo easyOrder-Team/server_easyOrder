@@ -3,12 +3,20 @@ const pool = require('../../config/bd');
 
 const orderOrders = (dbData) => {
   allData = dbData.rows.map((d) => {
+    d.date = d.date.UTC
     return {
       id: d.id_orders,
       avalible: d.avalible,
       profile: d.id_profile,
       price: d.total_price,
-      products: [{ id: d.id_product, name: d.name, amount: d.amount_product }],
+      products: [{ id: d.id_product, name: d.name, amount: d.amount_product, price: d.price, image: d.image}],
+      id_check: d.id_check,
+      id_mesa: d.id_mesa, 
+      id_order: d.id_order, 
+      id_profile: d.id_profile, 
+      date: new Intl.DateTimeFormat('es-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Cordoba' }).format(d.date), 
+      description: d.description, 
+      total: d.total_price
     };
   });
   let notRepeat = [];
@@ -57,7 +65,7 @@ const getAllOrders = async (req, res) => {
     }else{
       orders = await pool.query(`SELECT * FROM orders
         INNER JOIN product_order ON product_order.id_order = orders.id_orders
-        INNER JOIN products ON products.id_products = product_order.id_product
+        INNER JOIN products ON products.id_products = product_order.id_product 
         INNER JOIN payments ON payments.id_order = orders.id_orders WHERE id_profile = '${id}'`);
       orders = orderOrders(orders);
     }
@@ -66,6 +74,22 @@ const getAllOrders = async (req, res) => {
     res.json({ error: error.message });
   }
 };
+
+const getOrderById = async (req, res)=>{
+  try {
+    const { id } = req.params;
+    let orders
+    orders = await pool.query(`SELECT * FROM orders
+        INNER JOIN product_order ON product_order.id_order = orders.id_orders
+        INNER JOIN products ON products.id_products = product_order.id_product 
+        INNER JOIN payments ON payments.id_order = orders.id_orders WHERE orders.id_orders = '${id}'`);
+      orders = orderOrders(orders);
+    return res.json(orders);
+
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+}
 
 const changeStateOrder = async (req, res)=>{
   try {
@@ -109,4 +133,9 @@ const filterOrdersByState = async (req, res)=>{
   }
 }
 
-module.exports = { createOrder, getAllOrders, changeStateOrder, filterOrdersByState };
+module.exports = { 
+  createOrder,
+  getAllOrders, 
+  changeStateOrder, 
+  filterOrdersByState,
+  getOrderById };
