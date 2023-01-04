@@ -256,7 +256,7 @@ const timePreparationOrder = async (req, res) => {
 
 const priceOrder = async (req, res) => {
   try {
-    const { higher, minor} = req.body
+    const { higher, minor} = req.query
     let allData;
     const allprice = await pool.query(
       `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products 
