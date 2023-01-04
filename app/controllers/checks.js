@@ -4,7 +4,7 @@ const createCheck = async (req, res) => {
   try {
     const { id_check, name, lastname, date, total, email, id_order } = req.body;
     await pool.query(
-      `INSERT INTO payments (id_check, name, lastname, date, total, email, id_order) VALUES (${id_check}, '${name}', '${lastname}', '${date}', ${total}, '${email}', ${id_order})`
+      `INSERT INTO payments (id_check, name, lastname, date, total, email, id_order) VALUES ('${id_check}', '${name}', '${lastname}', '${date}', ${total}, '${email}', ${id_order})`
     );
     res.send("created");
   } catch (error) {
