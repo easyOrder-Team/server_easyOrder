@@ -49,6 +49,44 @@ const createOrder = async (req, res) => {
   }
 };
 
+// const createOrder = async (req, res) => {
+//   try {
+//     const { num_table, id_profile, total, products } = req.body;
+
+//     let order = await pool.query(
+//       `SELECT id_profile FROM orders WHERE avalible = true`
+//     );
+//     order = order.rows;
+
+//     console.log(id_profile);
+//     console.log(order[0].id_profile);
+//     if (order.length > 0) {
+//       let match = order.map((o) => {
+//         o.id_profile === id_profile;
+//       });
+//       if (match) {
+//         return res.json(`There is an active order from the user ${id_profile}`);
+//       }
+//     } else {
+//       await pool.query(
+//         `INSERT INTO orders (avalible, num_table, id_profile) VALUES (true, ${num_table}, '${id_profile}')`
+//       );
+//       let idOrder = await pool.query(
+//         `SELECT * FROM orders WHERE id_orders = (SELECT MAX(id_orders) FROM orders);`
+//       );
+//       idOrder = idOrder.rows[0].id_orders;
+//       for (let i = 0; i < products.length; i++) {
+//         await pool.query(
+//           `INSERT INTO product_order (id_product, id_order, amount_product, total_price) VALUES (${products[i].id}, ${idOrder}, ${products[i].amount}, ${total});`
+//         );
+//       }
+//       res.send("The order was successfully created");
+//     }
+//   } catch (error) {
+//     res.json({ error: error.message });
+//   }
+// };
+
 const getAllOrders = async (req, res) => {
   try {
     let orders = await pool.query(`SELECT * FROM orders
