@@ -1,4 +1,4 @@
-const pool = require("../../config/bd");
+const pool = require('../../config/bd');
 
 const orderReservation = (dbData) => {
   allData = dbData.rows.map((r) => {
@@ -65,6 +65,21 @@ const createReservation = async (req, res) => {
     res.status(404).json({ error: error.message });
   }
 };
+// if (reservation.rowCount === 0) {
+//   await pool.query(
+//     `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
+//   );
+//   let idReservation = await pool.query("SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);")
+//   idReservation = idReservation.rows[0].id_reservation
+//   for (let i = 0; i < allSite.length; i++) {
+//     for (let j = 0; j < num_table.length; j++) {
+//       if (allSite[i].num_table === num_table[j]) {
+//         await pool.query(
+//           `INSERT INTO reservation_site (id_reservation, id_site) VALUES('${idReservation}','${allSite[i].id_site}' )`
+//         );
+//       }
+//     }
+//   }
 
 const deleteReservation = async (req, res) => {
   try {
