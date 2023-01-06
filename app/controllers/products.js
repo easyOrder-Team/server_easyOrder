@@ -255,7 +255,9 @@ const timePreparationOrder = async (req, res) => {
 
 const priceOrder = async (req, res) => {
   try {
-    const { price } = req.query;
+
+    const { higher, minor} = req.query
+
     let allData;
     let allprice;
     allprice = await pool.query(

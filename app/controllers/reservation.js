@@ -30,12 +30,19 @@ const orderReservation = (dbData) => {
   return notRepeat;
 };
 
+
+
 const createReservation = async (req, res) => {
   try {
     const { amount_persons, date, hour, id_profile, num_table } = req.body;
-    const reservation = await pool.query(
-      `SELECT * FROM reservation WHERE id_profile = '${id_profile}' and date = '${date}'`
-    );
+    let reservation
+    for (let i = 0; i < num_table.length; i++) {
+      reservation = await pool.query(
+        `SELECT * FROM reservation 
+        INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
+        INNER JOIN site ON site.id_site = reservation_site.id_site WHERE date = '${date}' and hour = '${hour}' and num_table = ${num_table[i]} and state = true`
+      );      
+    }
     if (reservation.rowCount === 0) {
       let allSite = await pool.query(`SELECT * FROM site`);
       allSite = allSite.rows;
@@ -46,6 +53,7 @@ const createReservation = async (req, res) => {
         "SELECT * FROM reservation WHERE id_reservation = (SELECT MAX(id_reservation) FROM reservation);"
       );
       lastReservation = lastReservation.rows[0].id_reservation;
+
 
       for (let i = 0; i < allSite.length; i++) {
         for (let j = 0; j < num_table.length; j++) {
@@ -65,26 +73,11 @@ const createReservation = async (req, res) => {
     res.status(404).json({ error: error.message });
   }
 };
-// if (reservation.rowCount === 0) {
-//   await pool.query(
-//     `INSERT INTO reservation( Amount_Persons, Date, Hour, id_Profile) VALUES ( ${Amount_Persons}, '${date}', '${hour}', '${id_profile}')`
-//   );
-//   let idReservation = await pool.query("SELECT * FROM reservation WHERE id_reservation= (SELECT MAX(id_reservation) FROM reservation);")
-//   idReservation = idReservation.rows[0].id_reservation
-//   for (let i = 0; i < allSite.length; i++) {
-//     for (let j = 0; j < num_table.length; j++) {
-//       if (allSite[i].num_table === num_table[j]) {
-//         await pool.query(
-//           `INSERT INTO reservation_site (id_reservation, id_site) VALUES('${idReservation}','${allSite[i].id_site}' )`
-//         );
-//       }
-//     }
-//   }
 
 const deleteReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    const reservation = await pool.query(
+    await pool.query(
       `UPDATE reservation SET state = false WHERE id_reservation = ${id}`
     );
     return res.json("The reservation has been deleted");
@@ -113,6 +106,7 @@ const getAllDisablesReservation = async (req, res) => {
 const getAllReservation = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id)
     let allData = [];
     let reservations;
     if (id) {
@@ -120,18 +114,18 @@ const getAllReservation = async (req, res) => {
             INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
             INNER JOIN site ON site.id_site = reservation_site.id_site WHERE reservation.id_profile = '${id}' and state = true
             `);
+              allData = orderReservation(reservations);
+              return res.json(allData);
+            
     } else {
       reservations = await pool.query(
         `SELECT * FROM reservation
         INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
         INNER JOIN site ON site.num_table = reservation_site.id_site WHERE state = true`
       );
-      if (reservations.rows.length <= 0) {
-        return res.json(reservations);
-      } else {
         allData = orderReservation(reservations);
         return res.json(allData);
-      }
+      
     }
   } catch (error) {
     res.json({ message: error.message });
@@ -144,7 +138,7 @@ const activeReservation = async (req, res) => {
     const reservation = pool.query(
       `UPDATE reservation SET state = true WHERE id_reservation = ${id}`
     );
-    res.json(reservation);
+    res.send("la reserva se activo satisfactoriamente");
   } catch (error) {
     res.json({ message: error.message });
   }

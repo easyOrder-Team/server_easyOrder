@@ -4,9 +4,9 @@ const createCheck = async (req, res) => {
   try {
     const { id_check, name, lastname, date, total, email, id_order } = req.body;
     await pool.query(
-      `INSERT INTO payments (id_check, name, lastname, date, total, email, id_order) VALUES (${id_check}, '${name}', '${lastname}', '${date}', ${total}, '${email}', ${id_order})`
+      `INSERT INTO payments (id_check, name, lastname, date, total, email, id_order) VALUES ('${id_check}', '${name}', '${lastname}', '${date}', ${total}, '${email}', ${id_order})`
     );
-    res.send("created");
+    res.send("The check was successfully created");
   } catch (error) {
     res.json({ message: error.message });
   }
@@ -20,7 +20,7 @@ const getChecks = async (req, res) => {
         `SELECT * FROM payments WHERE id_check = '${id}'`
       );
       if (check.rowCount <= 0) {
-        return res.json(`There are no checks matching with the id ${id}`);
+        return res.json(`There are no checks matching with the ID ${id}`);
       }
       return res.json(check.rows);
     }
@@ -42,8 +42,9 @@ const filterCheckByDate = async (req, res) => {
     );
     if (allChecks.rowCount <= 0) {
       res.json(`No checks where emmited on ${date}`);
+    } else {
+      res.json(allChecks.rows);
     }
-    res.json(allChecks.rows);
   } catch (error) {
     res.json({ message: error.message });
   }
