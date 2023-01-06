@@ -97,7 +97,9 @@ const getProducts = async (req, res) => {
        INNER JOIN category ON category.id_category = products_category.id_categorie WHERE LOWER(products.name) ~ LOWER('${name}') AND stock = true`
       );
       if (dbData.rows.length <= 0) {
-        return res.json(`There are no products related to ${name} yet.`);
+        return res.json([
+          { message: `There are no products related to ${name} yet.` },
+        ]);
       } else {
         allData = orderProduct(dbData);
         return res.json(allData);
