@@ -10,7 +10,7 @@ const pool = new Pool({
   password: DB_PASSWORD,
   database: DB_NAME,
   port: DB_PORT, */
-  deply: DB_DEPLOY,
+  deploy: DB_DEPLOY,
 });
 
 module.exports = pool;
