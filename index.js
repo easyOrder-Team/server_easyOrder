@@ -10,6 +10,6 @@ app.use(express.json());
 
 app.use("/api/v1", router);
 
-app.listen(7481, () => {
+app.listen(PORT, () => {
   console.log(`Listen in ${PORT}`);
 });
