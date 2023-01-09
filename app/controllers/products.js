@@ -29,7 +29,6 @@ const orderProduct = (dbData) => {
   return notRepeat;
 };
 
-
 function firstCapital(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
@@ -208,13 +207,49 @@ const updateProduct = async (req, res) => {
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let value = values[i];
-      const data = await pool.query(
-        `UPDATE products SET ${key} = '${value}' WHERE id_products = ${id}`
-      );
-      if (data.rowCount.length < 0)
-        throw new Error("You must enter valid information");
+      if (key !== "category") {
+        const data = await pool.query(
+          `UPDATE products SET ${key} = '${value}' WHERE id_products = ${id}`
+        );
+        if (data.rowCount.length < 0)
+          throw new Error("You must enter valid information");
+      } else {
+        let newCategories = req.body.category;
+        let product = await pool.query(
+          `SELECT * FROM products WHERE id_products = ${id}`
+        );
+        product = product.rows[0];
+
+        let idCat = [];
+        for (i = 0; i < newCategories.length; i++) {
+          let id = await pool.query(
+            `SELECT id_category FROM category WHERE name_c = '${newCategories[i]}' `
+          );
+          idCat.push(id.rows[0].id_category);
+        }
+
+        let currentCategories = await pool.query(
+          `SELECT id_categorie FROM products_category WHERE id_product = ${id} `
+        );
+        currentCategories = currentCategories.rows.map((c) => {
+          return c.id_categorie;
+        });
+
+        if (idCat !== currentCategories) {
+          await pool.query(
+            `DELETE FROM products_category WHERE id_product = ${id} `
+          );
+        }
+
+        for (i = 0; i < idCat.length; i++) {
+          console.log(idCat[i]);
+          await pool.query(
+            `INSERT INTO products_category(id_product, id_categorie) VALUES (${id}, ${idCat[i]})`
+          );
+        }
+        return res.json("The product has been updated");
+      }
     }
-    return res.json("The product has been updated");
   } catch (error) {
     res.json(error.message);
   }
@@ -256,12 +291,12 @@ const timePreparationOrder = async (req, res) => {
 
 const priceOrder = async (req, res) => {
   try {
-    const { higher, minor} = req.body
+    const { higher, minor } = req.body;
     let allData;
     const allprice = await pool.query(
       `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products 
         INNER JOIN products_category ON products_category.id_product = products.id_products
-        INNER JOIN category on category.id_category = products_category.id_categorie WHERE products.price <= ${higher} and products.price >= ${minor}ORDER BY products.price ASC`  
+        INNER JOIN category on category.id_category = products_category.id_categorie WHERE products.price <= ${higher} and products.price >= ${minor}ORDER BY products.price ASC`
     );
     allData = orderProduct(allprice);
     res.json(allData);
