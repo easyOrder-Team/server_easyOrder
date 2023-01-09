@@ -2,10 +2,12 @@ const express = require("express");
 const router = express.Router();
 const {
   getChecks,
-  //filterCheckByDate
+  filterCheckByDate,
+  createCheck,
 } = require("../controllers/checks");
 
 router.get("/", getChecks);
-//router.get("/filter/date", filterByDate);
+router.get("/filter/date", filterCheckByDate);
+router.post("/", createCheck);
 
 module.exports = router;
