@@ -244,7 +244,6 @@ const updateProduct = async (req, res) => {
         }
 
         for (i = 0; i < idCat.length; i++) {
-          console.log(idCat[i]);
           await pool.query(
             `INSERT INTO products_category(id_product, id_categorie) VALUES (${id}, ${idCat[i]})`
           );
