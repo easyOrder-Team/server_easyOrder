@@ -25,7 +25,7 @@ router.get("/", (req, res) => {
       email:email
     },
     back_urls:{
-      success:"http://localhost:5173/confirmation",
+      success:"https://clienteasyorder-production-3461.up.railway.app/confirmation",
      
     },
     auto_return:"approved"
