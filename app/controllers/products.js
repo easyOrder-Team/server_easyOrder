@@ -311,25 +311,56 @@ const timePreparationOrder = async (req, res) => {
 // };
 //--------------------------- CODIGO LILA ---------------------------------------------
 
+// const priceOrder = async (req, res) => {
+//   try {
+//     let { category } = req.query;
+//     let { order } = req.query;
+//     let allData;
+
+//     category = firstCapital(category);
+//     if (order === "min-max") {
+//       order = "ASC";
+//     } else {
+//       order = "DESC";
+//     }
+
+//     allData = await pool.query(
+//       `SELECT * FROM products
+//       INNER JOIN products_category ON products_category.id_product = products.id_products
+//       INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}' ORDER BY products.price ${order}`
+//     );
+//     allData = orderProduct(allData);
+//     res.json(allData);
+//   } catch (error) {
+//     res.json(error.message);
+//   }
+//_______________________________________________________
 const priceOrder = async (req, res) => {
   try {
-    let { category } = req.query;
-    let { order } = req.query;
+    let { range } = req.query;
+    console.log("range desde back", range);
+    let { price } = req.query;
     let allData;
-
-    category = firstCapital(category);
-    if (order === "min-max") {
-      order = "ASC";
+    let allprice;
+    if (price === "minor") {
+      allprice = await pool.query(
+        `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products 
+            INNER JOIN products_category ON products_category.id_product = products.id_products
+            INNER JOIN category on category.id_category = products_category.id_categorie ORDER BY products.price ASC`
+      );
     } else {
-      order = "DESC";
+      allprice = await pool.query(
+        `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products 
+          INNER JOIN products_category ON products_category.id_product = products.id_products
+          INNER JOIN category on category.id_category = products_category.id_categorie ORDER BY products.price DESC`
+      );
     }
-
-    allData = await pool.query(
-      `SELECT * FROM products
-      INNER JOIN products_category ON products_category.id_product = products.id_products
-      INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}' ORDER BY products.price ${order}`
-    );
-    allData = orderProduct(allData);
+    // allprice = await pool.query(
+    //   `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
+    //     INNER JOIN products_category ON products_category.id_product = products.id_products
+    //     INNER JOIN category on category.id_category = products_category.id_categorie WHERE products.price <= ${higher} and products.price >= ${minor}ORDER BY products.price ASC`
+    // );
+    allData = orderProduct(allprice);
     res.json(allData);
   } catch (error) {
     res.json(error.message);
