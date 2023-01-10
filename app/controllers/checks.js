@@ -17,14 +17,20 @@ const getChecks = async (req, res) => {
     const { id } = req.query;
     if (id) {
       const check = await pool.query(
-        `SELECT * FROM payments WHERE id_check = '${id}'`
+        `SELECT * FROM payments
+        INNER JOIN orders ON payments.id_order = orders.id_orders 
+        INNER JOIN product_order ON product_order.id_order = payments.id_order
+        INNER JOIN products ON products.id_products = product_order.id_product WHERE id_check = '${id}'`
       );
       if (check.rowCount <= 0) {
         return res.json(`There are no checks matching with the ID ${id}`);
       }
-      return res.json(check.rows);
+      return res.json(check.rows[0]);
     }
-    const allChecks = await pool.query(`SELECT * FROM payments`);
+    const allChecks = await pool.query(`SELECT * FROM payments
+    INNER JOIN orders ON payments.id_order = orders.id_orders  
+    INNER JOIN product_order ON product_order.id_order = orders.id_orders
+    INNER JOIN products ON products.id_products = product_order.id_product`);
     if (allChecks.rowCount <= 0) {
       res.json("There are no checks yet");
     }
