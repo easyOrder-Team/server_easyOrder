@@ -97,7 +97,9 @@ const getProducts = async (req, res) => {
        INNER JOIN category ON category.id_category = products_category.id_categorie WHERE LOWER(products.name) ~ LOWER('${name}') AND stock = true`
       );
       if (dbData.rows.length <= 0) {
-        return res.json(`There are no products related to ${name} yet.`);
+        return res.json([
+          { message: `There are no products related to ${name} yet.` },
+        ]);
       } else {
         allData = orderProduct(dbData);
         return res.json(allData);
@@ -242,7 +244,6 @@ const updateProduct = async (req, res) => {
         }
 
         for (i = 0; i < idCat.length; i++) {
-          console.log(idCat[i]);
           await pool.query(
             `INSERT INTO products_category(id_product, id_categorie) VALUES (${id}, ${idCat[i]})`
           );
@@ -288,23 +289,51 @@ const timePreparationOrder = async (req, res) => {
     res.json(error.message);
   }
 };
+//--------------------------- CODIGO PREVIO ---------------------------------------------
+// const priceOrder = async (req, res) => {
+//   try {
+
+//     const { higher, minor} = req.query
+
+//     let allData;
+//     let allprice;
+//     allprice = await pool.query(
+//       `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
+//         INNER JOIN products_category ON products_category.id_product = products.id_products
+//         INNER JOIN category on category.id_category = products_category.id_categorie WHERE products.price <= ${higher} and products.price >= ${minor}ORDER BY products.price ASC`
+//     );
+//     allData = orderProduct(allprice);
+//     res.json(allData);
+//   } catch (error) {
+//     res.json(error.message);
+//   }
+// };
+//--------------------------- CODIGO LILA ---------------------------------------------
 
 const priceOrder = async (req, res) => {
   try {
-    const { higher, minor } = req.body;
+    let { category } = req.query;
+    let { order } = req.query;
     let allData;
-    const allprice = await pool.query(
-      `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products 
-        INNER JOIN products_category ON products_category.id_product = products.id_products
-        INNER JOIN category on category.id_category = products_category.id_categorie WHERE products.price <= ${higher} and products.price >= ${minor}ORDER BY products.price ASC`
+
+    category = firstCapital(category);
+    if (order === "min-max") {
+      order = "ASC";
+    } else {
+      order = "DESC";
+    }
+
+    allData = await pool.query(
+      `SELECT * FROM products
+      INNER JOIN products_category ON products_category.id_product = products.id_products
+      INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}' ORDER BY products.price ${order}`
     );
-    allData = orderProduct(allprice);
+    allData = orderProduct(allData);
     res.json(allData);
   } catch (error) {
     res.json(error.message);
   }
 };
-
 module.exports = {
   createProduct,
   getProducts,

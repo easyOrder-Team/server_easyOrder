@@ -1,6 +1,8 @@
 var mercadopago = require("mercadopago");
 const express = require("express");
 const router = express.Router();
+require("dotenv").config({ path: "../../.env" });
+const { URL_DOMAIN } = process.env;
 
 mercadopago.configure({
   access_token:
@@ -25,7 +27,7 @@ router.get("/", (req, res) => {
       email:email
     },
     back_urls:{
-      success:"https://clienteasyorder-production-3461.up.railway.app/confirmation",
+      success:`${URL_DOMAIN}/confirmation`,
      
     },
     auto_return:"approved"
