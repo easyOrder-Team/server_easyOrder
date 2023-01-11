@@ -79,7 +79,7 @@ const getAllOrders = async (req, res) => {
     let orders;
     if (!id) {
       orders =
-        await pool.query(`SELECT orders.id_orders, orders.avalible, orders.id_mesa, orders.id_profile, products.id_products, product_order.amount_product, product_order.total_price, products.name, orders.avalible, products.price, products.stock, orders.id_mesa, products.image, orders.state FROM orders
+        await pool.query(`SELECT orders.id_orders, orders.avalible, orders.id_mesa, orders.id_profile, products.id_products, product_order.amount_product, product_order.total_price, products.name, products.price, products.stock, products.image, orders.state FROM orders
       INNER JOIN product_order ON product_order.id_order = orders.id_orders
       INNER JOIN products ON products.id_products = product_order.id_product
       INNER JOIN payments ON payments.id_order = orders.id_orders`);
@@ -165,11 +165,11 @@ const filterOrdersByState = async (req, res) => {
 
 const getActiveOrders = async (req, res) => {
   try {
+    /* INNER JOIN payments ON payments.id_order = orders.id_orders WHERE orders.avalible = true */
     orders =
       await pool.query(`SELECT orders.id_orders, orders.avalible, orders.id_mesa, orders.id_profile, products.id_products, product_order.amount_product, product_order.total_price, products.name, orders.avalible, products.price, products.stock, orders.id_mesa, products.image, orders.state FROM orders
       INNER JOIN product_order ON product_order.id_order = orders.id_orders
-      INNER JOIN products ON products.id_products = product_order.id_product
-      INNER JOIN payments ON payments.id_order = orders.id_orders WHERE orders.avalible = true`);
+      INNER JOIN products ON products.id_products = product_order.id_product`);
 
     orders = orderOrders(orders);
     res.json(orders);
