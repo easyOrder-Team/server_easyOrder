@@ -244,6 +244,7 @@ const updateProduct = async (req, res) => {
         }
 
         for (i = 0; i < idCat.length; i++) {
+          console.log(idCat[i]);
           await pool.query(
             `INSERT INTO products_category(id_product, id_categorie) VALUES (${id}, ${idCat[i]})`
           );
@@ -289,55 +290,10 @@ const timePreparationOrder = async (req, res) => {
     res.json(error.message);
   }
 };
-//--------------------------- CODIGO PREVIO ---------------------------------------------
-// const priceOrder = async (req, res) => {
-//   try {
 
-//     const { higher, minor} = req.query
-
-//     let allData;
-//     let allprice;
-//     allprice = await pool.query(
-//       `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
-//         INNER JOIN products_category ON products_category.id_product = products.id_products
-//         INNER JOIN category on category.id_category = products_category.id_categorie WHERE products.price <= ${higher} and products.price >= ${minor}ORDER BY products.price ASC`
-//     );
-//     allData = orderProduct(allprice);
-//     res.json(allData);
-//   } catch (error) {
-//     res.json(error.message);
-//   }
-// };
-//--------------------------- CODIGO LILA ---------------------------------------------
-
-// const priceOrder = async (req, res) => {
-//   try {
-//     let { category } = req.query;
-//     let { order } = req.query;
-//     let allData;
-
-//     category = firstCapital(category);
-//     if (order === "min-max") {
-//       order = "ASC";
-//     } else {
-//       order = "DESC";
-//     }
-
-//     allData = await pool.query(
-//       `SELECT * FROM products
-//       INNER JOIN products_category ON products_category.id_product = products.id_products
-//       INNER JOIN category ON category.id_category = products_category.id_categorie WHERE category.name_c = '${category}' ORDER BY products.price ${order}`
-//     );
-//     allData = orderProduct(allData);
-//     res.json(allData);
-//   } catch (error) {
-//     res.json(error.message);
-//   }
-//_______________________________________________________
+//----------------------Henry´s code---> cambio ruta price order
 const priceOrder = async (req, res) => {
   try {
-    let { range } = req.query;
-    console.log("range desde back", range);
     let { price } = req.query;
     let allData;
     let allprice;
@@ -354,11 +310,7 @@ const priceOrder = async (req, res) => {
           INNER JOIN category on category.id_category = products_category.id_categorie ORDER BY products.price DESC`
       );
     }
-    // allprice = await pool.query(
-    //   `SELECT products.id_products, products.name, products.description, products.price, products.image, products.stock, products.prep_time , category.Id_category ,category.name_c FROM products
-    //     INNER JOIN products_category ON products_category.id_product = products.id_products
-    //     INNER JOIN category on category.id_category = products_category.id_categorie WHERE products.price <= ${higher} and products.price >= ${minor}ORDER BY products.price ASC`
-    // );
+
     allData = orderProduct(allprice);
     res.json(allData);
   } catch (error) {
