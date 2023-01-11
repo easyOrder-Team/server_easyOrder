@@ -16,7 +16,8 @@ const orderOrders = (dbData) => {
       id_profile: d.id_profile, 
       date: new Intl.DateTimeFormat('es-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Cordoba' }).format(d.date), 
       description: d.description, 
-      total: d.total_price
+      total: d.total_price,
+      state: d.state
     };
   });
   let notRepeat = [];
@@ -39,7 +40,7 @@ const createOrder = async (req, res) => {
   try {
     const {id_mesa, id_profile, total, products} = req.body;
 
-    await pool.query(`INSERT INTO orders (avalible,  id_mesa, id_profile) VALUES (true, ${id_mesa}, '${id_profile}')`)
+    await pool.query(`INSERT INTO orders (avalible,  id_mesa, id_profile, state) VALUES (true, ${id_mesa}, '${id_profile}', 'created')`)
     let idOrder = await pool.query(`SELECT * FROM orders WHERE id_orders = (SELECT MAX(id_orders) FROM orders)`)
     idOrder = idOrder.rows[0].id_orders
     for (let i = 0; i < products.length; i++) {
