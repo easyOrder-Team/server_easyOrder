@@ -28,9 +28,9 @@ const getChecks = async (req, res) => {
     const allChecks = await pool.query(`SELECT * FROM payments
     INNER JOIN orders ON payments.id_order = orders.id_orders`);
     if (allChecks.rowCount <= 0) {
-      res.json("There are no checks yet");
+      return res.json("There are no checks yet");
     }
-    return res.json(allChecks.rows);
+    res.json(allChecks.rows);
   } catch (error) {
     res.json({ message: error.message });
   }
