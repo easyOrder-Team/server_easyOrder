@@ -290,7 +290,6 @@ const timePreparationOrder = async (req, res) => {
   }
 };
 
-
 const priceOrder = async (req, res) => {
   try {
     let { price } = req.query;
