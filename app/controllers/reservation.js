@@ -40,7 +40,7 @@ const createReservation = async (req, res) => {
       reservation = await pool.query(
         `SELECT * FROM reservation 
         INNER JOIN reservation_site ON reservation_site.id_reservation = reservation.id_reservation
-        INNER JOIN site ON site.id_site = reservation_site.id_site WHERE date = '${date}' and hour = '${hour}' and num_table = ${num_table[i]} and state = true`
+        INNER JOIN site ON site.id_site = reservation_site.id_site WHERE date = '${date}' and hour = '${hour}' and num_table = '${num_table[i]}' and state = true`
       );      
     }
     if (reservation.rowCount === 0) {
