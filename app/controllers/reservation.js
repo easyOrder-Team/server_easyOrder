@@ -30,8 +30,6 @@ const orderReservation = (dbData) => {
   return notRepeat;
 };
 
-
-
 const createReservation = async (req, res) => {
   try {
     const { amount_persons, date, hour, id_profile, num_table } = req.body;
@@ -106,7 +104,7 @@ const getAllDisablesReservation = async (req, res) => {
 const getAllReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id)
+    console.log(req)
     let allData = [];
     let reservations;
     if (id) {
