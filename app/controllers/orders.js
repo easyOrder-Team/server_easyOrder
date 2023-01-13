@@ -129,31 +129,29 @@ const changeStateOrder = async (req, res) => {
       `SELECT state FROM orders WHERE id_orders = ${id}`
     );
     state = state.rows[0].state;
-    if (cancel) {
-      await pool.query(
-        `UPDATE orders SET state = 'cancel' WHERE id_orders = ${id}`
-      );
-      await pool.query(
-        `UPDATE orders SET avalible = false WHERE id_orders = ${id}`
-      );
+    console.log(typeof cancel);
+    if (cancel === "true") {
+      pool.query(`UPDATE orders SET state = 'cancel' WHERE id_orders = ${id}`);
+      pool.query(`UPDATE orders SET avalible = false WHERE id_orders = ${id}`);
       return res.send("cancel");
+    } else {
+      if (state === "created") {
+        pool.query(
+          `UPDATE orders SET state = 'processing' WHERE id_orders = ${id}`
+        );
+        return res.send("processing");
+      }
+      if (state === "processing") {
+        pool.query(
+          `UPDATE orders SET state = 'finished' WHERE id_orders = ${id}`
+        );
+        pool.query(
+          `UPDATE orders SET avalible = false WHERE id_orders = ${id}`
+        );
+        return res.send("finished");
+      }
+      res.send(`the state is ${state}`);
     }
-    if (state === "created") {
-      await pool.query(
-        `UPDATE orders SET state = 'processing' WHERE id_orders = ${id}`
-      );
-      return res.send("processing");
-    }
-    if (state === "processing") {
-      await pool.query(
-        `UPDATE orders SET state = 'finished' WHERE id_orders = ${id}`
-      );
-      await pool.query(
-        `UPDATE orders SET avalible = false WHERE id_orders = ${id}`
-      );
-      return res.send("finished");
-    }
-    res.send(`the state is ${state}`);
   } catch (error) {
     res.json({ message: error.message });
   }
