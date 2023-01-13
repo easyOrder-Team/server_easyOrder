@@ -91,7 +91,7 @@ const getProfile = async (req, res) => {
   try {
     const { id } = req.params;
     let allProfile = await pool.query(
-      `SELECT * FROM profile WHERE Id_profile = '${id}' and state = true`
+      `SELECT * FROM profile WHERE Id_profile = '${id}'`
     );
 
     if (allProfile.rows.length <= 0) {
