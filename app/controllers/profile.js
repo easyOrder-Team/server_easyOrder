@@ -30,13 +30,14 @@ const createProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id)
     const keys = Object.keys(req.body);
     const values = Object.values(req.body);
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let value = values[i];
       const data = await pool.query(
-        `UPDATE profile SET ${key} = '${value}' WHERE id_profile = ${id}`
+        `UPDATE profile SET ${key} = '${value}' WHERE id_profile = '${id}'`
       );
       if (data.rowCount.length < 0)
         throw new Error("You must enter valid information");
@@ -73,7 +74,7 @@ const becomeAdmin = async (req, res) => {
 const getAllProfile = async (req, res) => {
   try {
     let allProfile = await pool.query(
-      "SELECT * FROM profile WHERE state = true"
+      "SELECT * FROM profile"
     );
 
     if (allProfile.rows.length <= 0) {
@@ -90,7 +91,7 @@ const getProfile = async (req, res) => {
   try {
     const { id } = req.params;
     let allProfile = await pool.query(
-      `SELECT * FROM profile WHERE Id_profile = '${id}' and state = true`
+      `SELECT * FROM profile WHERE Id_profile = '${id}'`
     );
 
     if (allProfile.rows.length <= 0) {

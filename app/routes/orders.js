@@ -12,5 +12,4 @@ router.get('/orderbyid/filter/:id', getOrderById)
 router.delete('/:id', deleteOrder)
 router.put('/update/:id',updateOrder)
 
-
-module.exports = router
+module.exports = router;
