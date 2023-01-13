@@ -98,8 +98,7 @@ const getAllOrders = async (req, res) => {
     if (!id){
       orders = await pool.query(`SELECT orders.id_orders, orders.avalible, orders.id_mesa, orders.id_profile, products.id_products, product_order.amount_product, product_order.total_price, products.name, orders.avalible, products.price, products.stock, orders.id_mesa, products.image, orders.state FROM orders
       INNER JOIN product_order ON product_order.id_order = orders.id_orders
-      INNER JOIN products ON products.id_products = product_order.id_product
-      INNER JOIN payments ON payments.id_order = orders.id_orders`);
+      INNER JOIN products ON products.id_products = product_order.id_product`);
         
       orders = orderOrders(orders);
     }else{
@@ -127,8 +126,7 @@ const getOrderById = async (req, res)=>{
       // orders = orderOrders(orders);
       orders = await pool.query(`SELECT orders.id_orders, orders.avalible, orders.id_mesa, orders.id_profile, products.id_products, product_order.amount_product, product_order.total_price, products.name, orders.avalible, products.price, products.stock, orders.id_mesa, products.image, orders.state FROM orders
       INNER JOIN product_order ON product_order.id_order = orders.id_orders
-      INNER JOIN products ON products.id_products = product_order.id_product
-      INNER JOIN payments ON payments.id_order = orders.id_orders WHERE id_orders = '${id}'`);
+      INNER JOIN products ON products.id_products = product_order.id_product WHERE id_orders = '${id}'`);
       orders = orderOrders(orders);
     return res.json(orders);
 
@@ -183,8 +181,7 @@ const getActiveOrders = async(req, res) => {
   try {
     orders = await pool.query(`SELECT orders.id_orders, orders.avalible, orders.id_mesa, orders.id_profile, products.id_products, product_order.amount_product, product_order.total_price, products.name, orders.avalible, products.price, products.stock, orders.id_mesa, products.image, orders.state FROM orders
       INNER JOIN product_order ON product_order.id_order = orders.id_orders
-      INNER JOIN products ON products.id_products = product_order.id_product
-      INNER JOIN payments ON payments.id_order = orders.id_orders WHERE orders.avalible = true`);
+      INNER JOIN products ON products.id_products = product_order.id_product WHERE orders.avalible = true`);
         
       orders = orderOrders(orders);
       res.json(orders)
@@ -203,6 +200,26 @@ const deleteOrder = async (req,res) => {
     res.json({ message: error.message });
   }
 }
+
+const updateOrder = async (req,res) => {
+  try {
+    const {id} = req.params;
+    const {products, priceTotal} = req.body;
+    console.log(id)
+    await pool.query(`delete from product_order where id_order = ${id}`)
+
+    
+    for (let i = 0; i < products.length; i++) {
+      await pool.query(`INSERT INTO product_order (id_product, id_order, amount_product, total_price) VALUES (${products[i].id}, ${id}, ${products[i].count}, ${priceTotal})`)
+    }
+    res.sendStatus(201)
+
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+}
+
+
 module.exports = { 
   createOrder,
   getAllOrders, 
@@ -210,4 +227,5 @@ module.exports = {
   filterOrdersByState,
   getOrderById,
   deleteOrder,
-  getActiveOrders};
+  getActiveOrders,
+  updateOrder};
