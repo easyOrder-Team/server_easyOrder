@@ -110,10 +110,10 @@ const getOrderById = async (req, res) => {
     //     INNER JOIN payments ON payments.id_order = orders.id_orders WHERE orders.id_orders = '${id}'`);
     // orders = orderOrders(orders);
     orders =
+      //linea 116 INNER JOIN payments ON payments.id_order = orders.id_orders
       await pool.query(`SELECT orders.id_orders, orders.avalible, orders.id_mesa, orders.id_profile, products.id_products, product_order.amount_product, product_order.total_price, products.name, orders.avalible, products.price, products.stock, orders.id_mesa, products.image, orders.state FROM orders
       INNER JOIN product_order ON product_order.id_order = orders.id_orders
-      INNER JOIN products ON products.id_products = product_order.id_product
-      INNER JOIN payments ON payments.id_order = orders.id_orders WHERE id_orders = '${id}'`);
+      INNER JOIN products ON products.id_products = product_order.id_product WHERE id_orders = '${id}'`);
     orders = orderOrders(orders);
     return res.json(orders);
   } catch (error) {
@@ -124,28 +124,34 @@ const getOrderById = async (req, res) => {
 const changeStateOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { cancel, processing, finished } = req.query;
+    const { cancel } = req.query;
     let state = await pool.query(
       `SELECT state FROM orders WHERE id_orders = ${id}`
     );
     state = state.rows[0].state;
-    if (cancel === "cancel") {
+    console.log(typeof cancel);
+    if (cancel === "true") {
       pool.query(`UPDATE orders SET state = 'cancel' WHERE id_orders = ${id}`);
+      pool.query(`UPDATE orders SET avalible = false WHERE id_orders = ${id}`);
       return res.send("cancel");
+    } else {
+      if (state === "created") {
+        pool.query(
+          `UPDATE orders SET state = 'processing' WHERE id_orders = ${id}`
+        );
+        return res.send("processing");
+      }
+      if (state === "processing") {
+        pool.query(
+          `UPDATE orders SET state = 'finished' WHERE id_orders = ${id}`
+        );
+        pool.query(
+          `UPDATE orders SET avalible = false WHERE id_orders = ${id}`
+        );
+        return res.send("finished");
+      }
+      res.send(`the state is ${state}`);
     }
-    if (processing === "processing") {
-      pool.query(
-        `UPDATE orders SET state = 'processing' WHERE id_orders = ${id}`
-      );
-      return res.send("processing");
-    }
-    if (finished === "finished") {
-      pool.query(
-        `UPDATE orders SET state = 'finished' WHERE id_orders = ${id}`
-      );
-      return res.send("finished");
-    }
-    res.send(`the state is ${state}`);
   } catch (error) {
     res.json({ message: error.message });
   }
@@ -169,7 +175,7 @@ const getActiveOrders = async (req, res) => {
     orders =
       await pool.query(`SELECT orders.id_orders, orders.avalible, orders.id_mesa, orders.id_profile, products.id_products, product_order.amount_product, product_order.total_price, products.name, orders.avalible, products.price, products.stock, orders.id_mesa, products.image, orders.state FROM orders
       INNER JOIN product_order ON product_order.id_order = orders.id_orders
-      INNER JOIN products ON products.id_products = product_order.id_product`);
+      INNER JOIN products ON products.id_products = product_order.id_product WHERE orders.avalible = true`);
 
     orders = orderOrders(orders);
     res.json(orders);
